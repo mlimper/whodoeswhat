@@ -1,0 +1,235 @@
+html
+{
+    --primary-border-radius: 0.5rem;
+    
+    --creation-panel-background: #222;
+    --team-canvas-background: #2e2e2e;
+    --team-canvas-background-flashing: #444;
+    --team-canvas-pattern-color: #222;
+
+    --creation-panel-width: 30rem;   
+    --creation-panel-line-color: #555;
+    --creation-panel-line-width: 0.1rem;
+
+    --draggable-task-size: 8rem;
+
+    --primary-button-color: #333;    
+    --primary-button-text-color: white;
+    --primary-button-border-width: 0.15rem;    
+    --primary-button-border-color: white;
+
+    font-family: 'Trebuchet MS', Arial, sans-serif;
+    color: white;
+    user-select: none;
+}
+
+html, body
+{
+    width:100%;
+    height:100%;
+    border:0;
+    padding:0;
+    margin:0;
+}
+
+#creationPanel
+{
+    position: absolute;    
+    overflow: hidden;
+    left: 0;
+    width: var(--creation-panel-width);
+    height: calc(100% - var(--creation-panel-line-width));
+    border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);
+    padding:0;
+    margin:0;
+    background-color: var(--creation-panel-background);
+    -webkit-box-shadow: 3px 0px 6px 3px rgba(0,0,0,0.15);
+    -moz-box-shadow: 3px 0px 6px 3px rgba(0,0,0,0.15);
+    box-shadow: 3px 0px 6px 3px rgba(0,0,0,0.15);
+}
+
+#teamCanvas
+{
+    position: absolute;
+    overflow: hidden;
+    left: var(--creation-panel-width);
+    display: grid;
+    grid-template-columns: repeat( auto-fit, minmax(calc(3 * var(--draggable-task-size)), 1fr) );
+    gap: 1rem;
+    width: calc(100% - var(--creation-panel-width));
+    height: 100%;  
+    background: repeating-linear-gradient( 90deg, var(--team-canvas-pattern-color) 0, var(--team-canvas-pattern-color) 2%, transparent 0, transparent 50%),
+                repeating-linear-gradient(180deg, var(--team-canvas-pattern-color) 0, var(--team-canvas-pattern-color) 2%, transparent 0, transparent 50%);
+    background-color: var(--team-canvas-background);
+    background-size: 7rem 7rem;
+}
+
+h1
+{    
+    padding: 0.75rem;
+    margin: 0;
+    font-weight: 100;
+    color: #666;
+    background-color: #111;    
+}
+
+ h2
+{
+    margin: 0.2rem 0;    
+}
+
+.toolPanelSection, .dragElemCreationArea
+{    
+    border-top: var(--creation-panel-line-width) solid var(--creation-panel-line-color);    
+}
+
+.toolPanelSection
+{
+    padding: 1rem;
+}
+
+.dragElemCreationArea, .taskHolderDropArea
+{
+    display: grid;
+    gap: 1rem;    
+    grid-auto-rows: var(--draggable-task-size); 
+    padding: 0.8rem;
+    height: calc(100% - 18rem);    
+    margin: 0 0 1rem 0;      
+    border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);  
+    border-radius: var(--primary-border-radius);
+    background-color: var(--team-canvas-background);
+    -webkit-box-shadow: inset 0px 0px 6px 3px rgba(0,0,0,0.15);
+    -moz-box-shadow: inset 0px 0px 6px 3px rgba(0,0,0,0.15);
+    box-shadow: inset 0px 0px 6px 3px rgba(0,0,0,0.15);
+}
+
+.dragElemCreationArea
+{
+    grid-template-columns: var(--draggable-task-size) var(--draggable-task-size) var(--draggable-task-size);
+}
+
+.taskHolderDropArea
+{
+    grid-template-columns: var(--draggable-task-size) var(--draggable-task-size);    
+}
+
+/*.taskHolderDropArea * {
+    pointer-events: none;
+}*/
+
+.draggableTask
+{
+    justify-self: center;    
+    width: var(--draggable-task-size);
+    height: var(--draggable-task-size);                
+    text-align: center;
+    color: rgb(187, 238, 238);
+    border: 0.15rem solid rgb(3, 67, 67);
+    border-radius: var(--primary-border-radius);    
+    background: linear-gradient(rgb(2, 84, 63), rgb(12, 54, 77));
+}
+
+.draggableTaskTitle
+{
+    margin-top: 1rem;
+    height: 4.5rem;
+    font-weight: bold;
+}
+
+.draggableTasksSubtitle
+{
+    margin-top: 1rem;    
+}
+
+button:hover
+{
+    cursor: pointer;
+}
+
+.newElemButton
+{
+    width: 100%;
+    height: 2rem;
+    border: var(--primary-button-border-width) solid var(--primary-button-border-color);
+    color: var(--primary-button-text-color);
+    font-size: 105%;
+    font-weight: bold;
+    background-color: var(--primary-button-color);
+    border-radius: var(--primary-border-radius);
+}
+
+*[draggable=true]
+{
+    user-select: none;
+    cursor: move;
+}
+
+.taskHolder
+{    
+    justify-self: center; 
+    overflow: hidden;      
+    height: calc(2 * var(--draggable-task-size) + 10rem);
+    padding: 1rem;
+    margin: 1rem;
+    border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);  
+    background: var(--creation-panel-background);
+    border-radius: var(--primary-border-radius);
+    text-align: center;
+}
+
+.taskHolderTitle, .taskHolderSubtitle, .taskHolderScoring
+{
+    height: 1.6rem;
+    margin: 0.1rem 0;
+}
+
+.taskHolderTitle
+{
+    font-weight: bold;
+}
+
+.taskHolderDropArea
+{
+    width:  calc(2 * var(--draggable-task-size) + 1rem);
+    height: calc(2 * var(--draggable-task-size) + 1rem);
+}
+
+.flashingDropZone
+{
+    animation: pulse 1.3s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% {
+        background-color: var(--team-canvas-background);
+    }
+    50% {
+        background-color: var(--team-canvas-background-flashing);
+    }
+}
+
+.taskHolderScoring
+{
+    width: 100%;    
+    text-align: left;
+}
+
+.taskHolderScoringLabel
+{
+    display: inline-block;        
+    width: 5.5rem;
+}
+
+.scoreBar
+{
+    display: inline-block;
+    width: calc(100% - 6.2rem);
+    padding: 0.1rem;
+    text-align: center;    
+    background: linear-gradient(90deg,rgb(102, 117, 111) 50%, black 50%);
+}
+
+.scoreBarLabel
+{    
+}
