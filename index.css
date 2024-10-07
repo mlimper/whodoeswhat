@@ -11,7 +11,7 @@ html
     --creation-panel-line-color: #555;
     --creation-panel-line-width: 0.1rem;
 
-    --draggable-task-size: 8rem;
+    --draggable-Resp-size: 8rem;
 
     --primary-button-color: #333;    
     --primary-button-text-color: white;
@@ -51,10 +51,10 @@ html, body
 #teamCanvas
 {
     position: absolute;
-    overflow: hidden;
+    overflow-y: scroll;
     left: var(--creation-panel-width);
     display: grid;
-    grid-template-columns: repeat( auto-fit, minmax(calc(3 * var(--draggable-task-size)), 1fr) );
+    grid-template-columns: repeat( auto-fit, minmax(calc(3 * var(--draggable-Resp-size)), 1fr) );
     gap: 1rem;
     width: calc(100% - var(--creation-panel-width));
     height: 100%;  
@@ -78,7 +78,7 @@ h1
     margin: 0.2rem 0;    
 }
 
-.toolPanelSection, .dragElemCreationArea
+.toolPanelSection, #respCreationArea
 {    
     border-top: var(--creation-panel-line-width) solid var(--creation-panel-line-color);    
 }
@@ -88,11 +88,11 @@ h1
     padding: 1rem;
 }
 
-.dragElemCreationArea, .taskHolderDropArea
+#respCreationArea, .respHolderDropArea
 {
     display: grid;
     gap: 1rem;    
-    grid-auto-rows: var(--draggable-task-size); 
+    grid-auto-rows: var(--draggable-Resp-size); 
     padding: 0.8rem;
     height: calc(100% - 18rem);    
     margin: 0 0 1rem 0;      
@@ -104,25 +104,25 @@ h1
     box-shadow: inset 0px 0px 6px 3px rgba(0,0,0,0.15);
 }
 
-.dragElemCreationArea
+#respCreationArea
 {
-    grid-template-columns: var(--draggable-task-size) var(--draggable-task-size) var(--draggable-task-size);
+    grid-template-columns: var(--draggable-Resp-size) var(--draggable-Resp-size) var(--draggable-Resp-size);
 }
 
-.taskHolderDropArea
+.respHolderDropArea
 {
-    grid-template-columns: var(--draggable-task-size) var(--draggable-task-size);    
+    grid-template-columns: var(--draggable-Resp-size) var(--draggable-Resp-size);    
 }
 
-/*.taskHolderDropArea * {
+/*.respHolderDropArea * {
     pointer-events: none;
 }*/
 
-.draggableTask
+.draggableResp
 {
     justify-self: center;    
-    width: var(--draggable-task-size);
-    height: var(--draggable-task-size);                
+    width: var(--draggable-Resp-size);
+    height: var(--draggable-Resp-size);                
     text-align: center;
     color: rgb(187, 238, 238);
     border: 0.15rem solid rgb(3, 67, 67);
@@ -130,14 +130,14 @@ h1
     background: linear-gradient(rgb(2, 84, 63), rgb(12, 54, 77));
 }
 
-.draggableTaskTitle
+.draggableRespTitle
 {
     margin-top: 1rem;
     height: 4.5rem;
     font-weight: bold;
 }
 
-.draggableTasksSubtitle
+.draggableRespsSubtitle
 {
     margin-top: 1rem;    
 }
@@ -165,11 +165,11 @@ button:hover
     cursor: move;
 }
 
-.taskHolder
+.respHolder
 {    
     justify-self: center; 
     overflow: hidden;      
-    height: calc(2 * var(--draggable-task-size) + 10rem);
+    height: calc(2 * var(--draggable-Resp-size) + 10rem);
     padding: 1rem;
     margin: 1rem;
     border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);  
@@ -178,21 +178,21 @@ button:hover
     text-align: center;
 }
 
-.taskHolderTitle, .taskHolderSubtitle, .taskHolderScoring
+.respHolderTitle, .respHolderSubtitle, .respHolderScoring
 {
     height: 1.6rem;
     margin: 0.1rem 0;
 }
 
-.taskHolderTitle
+.respHolderTitle
 {
     font-weight: bold;
 }
 
-.taskHolderDropArea
+.respHolderDropArea
 {
-    width:  calc(2 * var(--draggable-task-size) + 1rem);
-    height: calc(2 * var(--draggable-task-size) + 1rem);
+    width:  calc(2 * var(--draggable-Resp-size) + 1rem);
+    height: calc(2 * var(--draggable-Resp-size) + 1rem);
 }
 
 .flashingDropZone
@@ -209,13 +209,13 @@ button:hover
     }
 }
 
-.taskHolderScoring
+.respHolderScoring
 {
     width: 100%;    
     text-align: left;
 }
 
-.taskHolderScoringLabel
+.respHolderScoringLabel
 {
     display: inline-block;        
     width: 5.5rem;

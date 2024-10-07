@@ -11,57 +11,57 @@
         <!-- TEAM CANVAS -->
         <div id="teamCanvas">
 
-            <div class ="taskHolder">                
-                <div class="taskHolderTitle">John A. Doe</div>
-                <div class="taskHolderSubtitle">Head of Stuff</div>
-                <div class="taskHolderDropArea dropTarget">
+            <div class ="respHolder" id="t0">                
+                <div class="respHolderTitle">John A. Doe</div>
+                <div class="respHolderSubtitle">Head of Stuff</div>
+                <div class="respHolderDropArea dropTarget">
                 </div>
-                <div class="taskHolderScoring">
-                    <span class="taskHolderScoringLabel">Task Focus:</span>
+                <div class="respHolderScoring">
+                    <span class="respHolderScoringLabel">Focus:</span>
                     <span class="scoreBar">
                         <span class="scoreBarLabel">100</span>
                     </span>
                 </div>
-                <div class="taskHolderScoring">
-                    <span class="taskHolderScoringLabel">Workload:</span>
+                <div class="respHolderScoring">
+                    <span class="respHolderScoringLabel">Workload:</span>
                     <span class="scoreBar">
                         <span class="scoreBarLabel">0</span>
                     </span>
                 </div>
             </div>
 
-            <div class ="taskHolder">                
-                <div class="taskHolderTitle">John F. Bar</div>
-                <div class="taskHolderSubtitle">Stuff Developer</div>
-                <div class="taskHolderDropArea dropTarget"> 
+            <div class ="respHolder" id="t1">                
+                <div class="respHolderTitle">John F. Bar</div>
+                <div class="respHolderSubtitle">Stuff Developer</div>
+                <div class="respHolderDropArea dropTarget"> 
                 </div>
-                <div class="taskHolderScoring">
-                    <span class="taskHolderScoringLabel">Task Focus:</span>
+                <div class="respHolderScoring">
+                    <span class="respHolderScoringLabel">Focus:</span>
                     <span class="scoreBar">
                         <span class="scoreBarLabel">100</span>
                     </span>
                 </div>
-                <div class="taskHolderScoring">
-                    <span class="taskHolderScoringLabel">Workload:</span>
+                <div class="respHolderScoring">
+                    <span class="respHolderScoringLabel">Workload:</span>
                     <span class="scoreBar">
                         <span class="scoreBarLabel">0</span>
                     </span>
                 </div>
             </div>
 
-            <div class ="taskHolder">                
-                <div class="taskHolderTitle">Alice Bobson</div>
-                <div class="taskHolderSubtitle">Stuff Developer</div>
-                <div class="taskHolderDropArea dropTarget"> 
+            <div class ="respHolder" id="t2">                
+                <div class="respHolderTitle">Alice Bobson</div>
+                <div class="respHolderSubtitle">Stuff Developer</div>
+                <div class="respHolderDropArea dropTarget"> 
                 </div>
-                <div class="taskHolderScoring">
-                    <span class="taskHolderScoringLabel">Task Focus:</span>
+                <div class="respHolderScoring">
+                    <span class="respHolderScoringLabel">Focus:</span>
                     <span class="scoreBar">
                         <span class="scoreBarLabel">100</span>
                     </span>
                 </div>
-                <div class="taskHolderScoring">
-                    <span class="taskHolderScoringLabel">Workload:</span>
+                <div class="respHolderScoring">
+                    <span class="respHolderScoringLabel">Workload:</span>
                     <span class="scoreBar">
                         <span class="scoreBarLabel">0</span>
                     </span>
@@ -77,37 +77,37 @@
 
             <div class="toolPanelSection">
 
-                <!--h2>Tasks</h2-->
-                <div class="dragElemCreationArea">                    
+                <!--h2>Resps</h2-->
+                <div id="respCreationArea">                    
                     
-                    <div class="draggableTask" draggable="true" id="t0">
-                        <div class="draggableTaskTitle">Accounting: Invoices</div>
-                        <div class="draggableTaskSubtitle">4h / week</div>
+                    <div class="draggableResp" draggable="true" id="r0">
+                        <div class="draggableRespTitle">Accounting: Invoices</div>
+                        <div class="draggableRespSubtitle">4h / week</div>
                     </div>
 
-                    <div class="draggableTask" draggable="true" id="t1">
-                        <div class="draggableTaskTitle">HR: Contracting</div>
-                        <div class="draggableTaskSubtitle">4h / week</div>
+                    <div class="draggableResp" draggable="true" id="r1">
+                        <div class="draggableRespTitle">HR: Contracting</div>
+                        <div class="draggableRespSubtitle">4h / week</div>
                     </div>
 
-                    <div class="draggableTask" draggable="true" id="t2">
-                        <div class="draggableTaskTitle">Marketing: Blog &amp; Articles</div>
-                        <div class="draggableTaskSubtitle">16h / week</div>
+                    <div class="draggableResp" draggable="true" id="r2">
+                        <div class="draggableRespTitle">Marketing: Blog &amp; Articles</div>
+                        <div class="draggableRespSubtitle">16h / week</div>
                     </div>
 
-                    <div class="draggableTask" draggable="true" id="t3">
-                        <div class="draggableTaskTitle">Management: Team Goals</div>
-                        <div class="draggableTaskSubtitle">4h / week</div>
+                    <div class="draggableResp" draggable="true" id="r3">
+                        <div class="draggableRespTitle">Management: Team Goals</div>
+                        <div class="draggableRespSubtitle">4h / week</div>
                     </div>
 
-                    <div class="draggableTask" draggable="true" id="t4">
-                        <div class="draggableTaskTitle">Marketing: Website</div>
-                        <div class="draggableTaskSubtitle">8h / week</div>
+                    <div class="draggableResp" draggable="true" id="r4">
+                        <div class="draggableRespTitle">Marketing: Website</div>
+                        <div class="draggableRespSubtitle">8h / week</div>
                     </div>
 
                 </div>
 
-                <button class="newElemButton" onclick="newTaskButtonClicked()">New Task</button>
+                <button class="newElemButton" onclick="newRespButtonClicked()">New Responsibility</button>
 
             </div>
 
