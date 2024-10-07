@@ -7,7 +7,7 @@ html
     --team-canvas-background-flashing: #444;
     --team-canvas-pattern-color: #222;
 
-    --creation-panel-width: 30rem;   
+    --creation-panel-width: 30.8rem;
     --creation-panel-line-color: #555;
     --creation-panel-line-width: 0.1rem;
 
@@ -21,6 +21,8 @@ html
     font-family: 'Trebuchet MS', Arial, sans-serif;
     color: white;
     user-select: none;
+    
+    scrollbar-color: var(--creation-panel-line-color) var(--primary-button-color);
 }
 
 html, body
@@ -107,6 +109,9 @@ h1
 #respCreationArea
 {
     grid-template-columns: var(--draggable-Resp-size) var(--draggable-Resp-size) var(--draggable-Resp-size);
+    overflow-x: hidden;
+    overflow-y: scroll;
+    border-radius: 0;
 }
 
 .respHolderDropArea
