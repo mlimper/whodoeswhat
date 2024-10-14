@@ -4,6 +4,8 @@
 // EDIT BUTTON TEAM
 // EDIT BUTTON RESP
 
+const gSchemaVersion = "0.1-dev";
+
 //------------------------------------------------------------------------------
 // data structures
 //------------------------------------------------------------------------------
@@ -48,19 +50,43 @@ let gTeamIDCounter = 0;
 
 //------------------------------------------------------------------------------
 
-let resps = [];
+let gResps = [];
 
 //------------------------------------------------------------------------------
 
-let team = [];
+let gTeam = [];
 
 //------------------------------------------------------------------------------
 // functions
 //------------------------------------------------------------------------------
 
+function updateLocalStorage()
+{
+    const data = JSON.stringify({ "resps" : gResps, "team" : gTeam });
+    
+    localStorage.setItem("wdw-data-" + gSchemaVersion, data);
+}
+
+//------------------------------------------------------------------------------
+
+function updateAppFromLocalStorage()
+{
+    const dataStr = localStorage.getItem("wdw-data-" + gSchemaVersion);
+
+    if (dataStr)
+    {
+        const data = JSON.parse(dataStr);
+
+        gResps = data.resps;
+        gTeam  = data.team;
+    }
+}
+
+//------------------------------------------------------------------------------
+
 function findTeamMember(id)
 {
-    for (const t of team)
+    for (const t of gTeam)
     {
         if (t.id == id)
         {
@@ -169,6 +195,22 @@ function addToDOM(tree, parent)
 
 function init()
 {
+    //TODO: INIT SHOULD BE CALLED ONLY ONCE AND THEN WE DON'T NEED A HACK
+    if (gResps.length == 0 && gTeam.length == 0)
+    {
+        updateAppFromLocalStorage();
+
+        for (const r of gResps)
+        {
+            createOrUpdateResponsibility(r.id, r);
+        }
+
+        for (const t of gTeam)
+        {
+            createOrUpdateTeamMember(t.id, t);
+        }
+    }
+
     // drag start behavior
     const draggables = document.querySelectorAll(".draggableResp");
 
@@ -243,6 +285,8 @@ function init()
 
                 //TODO: find and transfer responsibility
                 //t.responsibilities.push(...);
+
+                updateLocalStorage();
             }
             
             //... e.target.parent.querySelectorAll(".respHolderScoring");
@@ -265,26 +309,30 @@ function constructScoreBarTree(title, id)
 
 //------------------------------------------------------------------------------
 
-function createOrUpdateResponsibility(id)
+function createOrUpdateResponsibility(id, rData)
 {
     const htmlID = "#r" + id;
     let elem = document.querySelector(htmlID);
 
     // responsibility doesn't exist yet -> create new one
     if (!elem)
-    {   
-        let what     = document.querySelector("#respNameInput").value;
-        let workload = document.querySelector("#respHoursInput").value + "h / week";
-
-        const r = new Responsibility(gRespsIDCounter, what, workload);
-        resps.push(r);
+    {           
+        const r = (rData ? rData : new Responsibility(gRespsIDCounter,
+                                                      document.querySelector("#respNameInput").value,
+                                                      "",
+                                                      document.querySelector("#respHoursInput").value + "h / week"));
+        
+        if (!rData)
+        {
+            gResps.push(r);
+        }
 
         const newRespHTML = 
         [
             "div", { "class" : "draggableResp", draggable: "true", id : htmlID}, "",
             [
-                ["div", {"class" : "draggableRespTitle"},    what,      []],
-                ["div", {"class" : "draggableRespSubtitle"}, workload,  []]
+                ["div", {"class" : "draggableRespTitle"},    r.title,       []],
+                ["div", {"class" : "draggableRespSubtitle"}, r.weeklyHours, []]
             ]
         ];
 
@@ -303,7 +351,7 @@ function createOrUpdateResponsibility(id)
 
 //------------------------------------------------------------------------------
 
-function createOrUpdateTeamMember(id)
+function createOrUpdateTeamMember(id, tData)
 {
     const htmlID = "#t" + id;
     let elem = document.querySelector("#t" + id);
@@ -311,19 +359,24 @@ function createOrUpdateTeamMember(id)
     // team member doesn't exist yet -> create new one
     if (!elem)
     {   
-        let who      = document.querySelector("#teamMemberNameInput").value;
-        let title    = document.querySelector("#teamMemberPositionInput").value;
-        let capacity = document.querySelector("#teamMemberHoursInput").value;
+        const t = (tData ? tData : new TeamMember(gTeamIDCounter,
+                                                  document.querySelector("#teamMemberNameInput").value,
+                                                  document.querySelector("#teamMemberPositionInput").value,
+                                                  [],
+                                                  document.querySelector("#teamMemberHoursInput").value,
+                                                  0, 0));
 
-        const t = new TeamMember(gTeamIDCounter, who, title, [], capacity, 0, 0);
-        team.push(t);
+        if (!tData)
+        {
+            gTeam.push(t);
+        }        
 
         const newTeamMember = 
         [
             "div", { "class" : "respHolder", id : htmlID}, "",
             [
-                ["div", {"class" : "respHolderTitle"},    who,   []],
-                ["div", {"class" : "respHolderSubtitle"}, title, []],
+                ["div", {"class" : "respHolderTitle"},    t.name,  []],
+                ["div", {"class" : "respHolderSubtitle"}, t.title, []],
                 ["div", {"class" : "respHolderDropArea dropTarget"}, "",   []],
                 //constructScoreBarTree("Focus:"),
                 //constructScoreBarTree("Workload:", htmlID + "WorkloadBar")
