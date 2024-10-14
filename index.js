@@ -58,18 +58,71 @@ let team = [];
 // functions
 //------------------------------------------------------------------------------
 
-function newRespButtonClicked()
+function findTeamMember(id)
 {
-    createOrUpdateResponsibility(gRespsIDCounter);
-    ++gRespsIDCounter;
+    for (const t of team)
+    {
+        if (t.id == id)
+        {
+            return t;
+        }
+    }
+
+    return null;
 }
 
 //------------------------------------------------------------------------------
 
-function newTeamMemberButtonClicked()
+function toggleDialog(elemID, toggleState)
+{
+    document.getElementById(elemID).style.visibility          = (toggleState ? "visible" : "hidden");
+    document.getElementById("modalBackdrop").style.visibility = (toggleState ? "visible" : "hidden");
+}
+
+//------------------------------------------------------------------------------
+
+function respDialogXClicked()
+{
+    toggleDialog("createRespDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function createRespBtnClicked()
+{
+    createOrUpdateResponsibility(gRespsIDCounter);
+    ++gRespsIDCounter;
+    toggleDialog("createRespDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function newRespBtnClicked()
+{
+    toggleDialog("createRespDialog", true);
+}
+
+//------------------------------------------------------------------------------
+
+function teamMemberDialogXClicked()
+{
+    toggleDialog("createTeamMemberDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function createTeamMemberBtnClicked()
 {
     createOrUpdateTeamMember(gTeamIDCounter);
     ++gTeamIDCounter;
+    toggleDialog("createTeamMemberDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function newTeamMemberBtnClicked()
+{
+    toggleDialog("createTeamMemberDialog", true);
 }
 
 //------------------------------------------------------------------------------
@@ -177,10 +230,21 @@ function init()
             e.target.classList.remove("flashingDropZone");
 
             const dropData = e.dataTransfer.getData("text");
-            const RespElem = document.getElementById(dropData)
-            e.target.appendChild(RespElem);
+            const respElem = document.getElementById(dropData)
+            e.target.appendChild(respElem);
 
-            //TODO: adapt scores
+            // adapt scores            
+            if (e.target.classList.contains("respHolderDropArea"))
+            {
+                const teamMemberID = Number(e.target.parentElement.id.substring(2));
+                const t = findTeamMember(teamMemberID);
+                
+                const wlBarID = "#t" + teamMemberID + "WorkloadBar";
+
+                //TODO: find and transfer responsibility
+                //t.responsibilities.push(...);
+            }
+            
             //... e.target.parent.querySelectorAll(".respHolderScoring");
         };
     }
@@ -188,10 +252,10 @@ function init()
 
 //------------------------------------------------------------------------------
 
-function constructScoreBarTree(title)
+function constructScoreBarTree(title, id)
 {
     return [
-        "div", {"class" : "respHolderScoring"}, "", [
+        "div", {"id" : id, "class" : "respHolderScoring"}, "", [
             ["span", {"class" : "respHolderScoringLabel"}, title, []],
             ["span", {"class" : "scoreBar"},"", [
                 ["span", {"class" : "scoreBarLabel"}, "0", []]
@@ -203,28 +267,33 @@ function constructScoreBarTree(title)
 
 function createOrUpdateResponsibility(id)
 {
-    //TODO: query attribs, update JS object
-
     const htmlID = "#r" + id;
     let elem = document.querySelector(htmlID);
 
     // responsibility doesn't exist yet -> create new one
     if (!elem)
-    {    
-        const newResp = 
+    {   
+        let what     = document.querySelector("#respNameInput").value;
+        let workload = document.querySelector("#respHoursInput").value + "h / week";
+
+        const r = new Responsibility(gRespsIDCounter, what, workload);
+        resps.push(r);
+
+        const newRespHTML = 
         [
             "div", { "class" : "draggableResp", draggable: "true", id : htmlID}, "",
             [
-                ["div", {"class" : "draggableRespTitle"},    "Accounting: Invoices", []],
-                ["div", {"class" : "draggableRespSubtitle"}, "4h / week",            []]
+                ["div", {"class" : "draggableRespTitle"},    what,      []],
+                ["div", {"class" : "draggableRespSubtitle"}, workload,  []]
             ]
         ];
 
-        addToDOM(newResp, document.querySelector("#respCreationArea"));
+        addToDOM(newRespHTML, document.querySelector("#respCreationArea"));
 
         //TODO: DIRTY - SHOULD JUST ADD THE NECESSARY CALLBACKS
         init();
     }
+    // TODO: MAKE EDITABLE LATER (CURRENTLY WE CAN ONLY RE-CREATE ITEMS)
     // responsibility exists -> update element
     else
     {
@@ -236,23 +305,28 @@ function createOrUpdateResponsibility(id)
 
 function createOrUpdateTeamMember(id)
 {
-    //TODO: query attribs, update JS object
-
     const htmlID = "#t" + id;
     let elem = document.querySelector("#t" + id);
-
+    
     // team member doesn't exist yet -> create new one
     if (!elem)
     {   
+        let who      = document.querySelector("#teamMemberNameInput").value;
+        let title    = document.querySelector("#teamMemberPositionInput").value;
+        let capacity = document.querySelector("#teamMemberHoursInput").value;
+
+        const t = new TeamMember(gTeamIDCounter, who, title, [], capacity, 0, 0);
+        team.push(t);
+
         const newTeamMember = 
         [
             "div", { "class" : "respHolder", id : htmlID}, "",
             [
-                ["div", {"class" : "respHolderTitle"},    "John A. Doe",   []],
-                ["div", {"class" : "respHolderSubtitle"}, "Head of Stuff", []],
+                ["div", {"class" : "respHolderTitle"},    who,   []],
+                ["div", {"class" : "respHolderSubtitle"}, title, []],
                 ["div", {"class" : "respHolderDropArea dropTarget"}, "",   []],
-                constructScoreBarTree("Focus:"),
-                constructScoreBarTree("Workload:")
+                //constructScoreBarTree("Focus:"),
+                //constructScoreBarTree("Workload:", htmlID + "WorkloadBar")
             ]
         ];
 
@@ -261,6 +335,7 @@ function createOrUpdateTeamMember(id)
         //TODO: DIRTY - SHOULD JUST ADD THE NECESSARY CALLBACKS
         init();
     }
+    // TODO: MAKE EDITABLE LATER (CURRENTLY WE CAN ONLY RE-CREATE ITEMS)
     // team member exists -> update element
     else
     {

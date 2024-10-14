@@ -6,12 +6,51 @@
         <script src="index.js"></script>
     </head>
 
-    <body onload="init()">
-                
+    <body onload="init()">                
+        
+        <div id="modalBackdrop"></div>
+        
+        <!-- DIALOG: NEW RESPONSIBILITY -->
+        <div id="createRespDialog" class="dialog">  
+            <div class="dialogHeaderBar">New Responsibility
+                <button class="dialogButtonX" onclick="respDialogXClicked()">X</button>
+            </div>
+            <div class="dialogInput">                
+                <div class="dialogInputLine">
+                    <input id="respNameInput"   type="text"   value="Title"></input>
+                </div>
+                <div class="dialogInputLine">
+                    <input id="respHoursInput" type="number" value="8"></input><br>
+                    <label for="respHoursInput">h / week</label>
+                </div>
+                <button id="newRespBtn" onclick="createRespBtnClicked()">Create</button>
+            </div>                        
+        </div>
+
+         <!-- DIALOG: NEW TEAM MEMBER -->
+         <div id="createTeamMemberDialog" class="dialog">  
+            <div class="dialogHeaderBar">New Team Member
+                <button class="dialogButtonX" onclick="teamMemberDialogXClicked()">X</button>
+            </div>
+            <div class="dialogInput">                
+                <div class="dialogInputLine">
+                    <input id="teamMemberNameInput" type="text" value="Name"></input>
+                </div>
+                <div class="dialogInputLine">
+                    <input id="teamMemberPositionInput" type="text" value="Title"></input>
+                </div>
+                <div class="dialogInputLine">
+                    <input id="teamMemberHoursInput" type="number" value="8"></input><br>
+                    <label for="respNumberInput">h / week</label>
+                </div>
+                <button id="newRespBtn" onclick="createTeamMemberBtnClicked()">Create</button>
+            </div>                        
+        </div>
+
         <!-- TEAM CANVAS -->
         <div id="teamCanvas">
 
-            <div class ="respHolder" id="t0">                
+            <!--div class ="respHolder" id="t0">                
                 <div class="respHolderTitle">John A. Doe</div>
                 <div class="respHolderSubtitle">Head of Stuff</div>
                 <div class="respHolderDropArea dropTarget">
@@ -66,7 +105,7 @@
                         <span class="scoreBarLabel">0</span>
                     </span>
                 </div>
-            </div>
+            </div-->
 
         </div>
 
@@ -77,10 +116,9 @@
 
             <div class="toolPanelSection">
 
-                <!--h2>Resps</h2-->
                 <div id="respCreationArea">                    
                     
-                    <div class="draggableResp" draggable="true" id="r0">
+                    <!--div class="draggableResp" draggable="true" id="r0">
                         <div class="draggableRespTitle">Accounting: Invoices</div>
                         <div class="draggableRespSubtitle">4h / week</div>
                     </div>
@@ -103,17 +141,17 @@
                     <div class="draggableResp" draggable="true" id="r4">
                         <div class="draggableRespTitle">Marketing: Website</div>
                         <div class="draggableRespSubtitle">8h / week</div>
-                    </div>
+                    </div-->
 
                 </div>
 
-                <button class="newElemButton" onclick="newRespButtonClicked()">New Responsibility</button>
+                <button class="newElemBtn" onclick="newRespBtnClicked()">New Responsibility</button>
 
             </div>
 
             <div class="toolPanelSection">
 
-                <button class="newElemButton" onclick="newTeamMemberButtonClicked()">New Team Member</button>
+                <button class="newElemBtn" onclick="newTeamMemberBtnClicked()">New Team Member</button>
 
             </div>
 
