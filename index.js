@@ -18,6 +18,7 @@ class Responsibility
       this.title       = title;
       this.description = description;
       this.weeklyHours = weeklyHours;
+      this.teamMemberID  = -1;
     }
 }
 
@@ -25,13 +26,13 @@ class Responsibility
 
 class TeamMember
 {
-    constructor(id, name, title, responsibilities, weeklyHourBudget,
+    constructor(id, name, title, respIDs, weeklyHourBudget,
                 focusScore, workloadScore)
     {
         this.id               = id;
         this.name             = name;
         this.title            = title;
-        this.responsibilities = responsibilities;
+        this.respIDs          = respIDs;
         this.weeklyHourBudget = weeklyHourBudget;
         this.focusScore       = focusScore;
         this.workloadScore    = workloadScore;
@@ -60,6 +61,20 @@ let gTeam = [];
 // functions
 //------------------------------------------------------------------------------
 
+function findMaxID(objArr)
+{
+    let maxVal = -1;
+
+    for (const o of objArr)
+    {
+        maxVal = Math.max(o.id, maxVal);
+    }
+
+    return maxVal;
+}
+
+//------------------------------------------------------------------------------
+
 function updateLocalStorage()
 {
     const data = JSON.stringify({ "resps" : gResps, "team" : gTeam });
@@ -69,7 +84,7 @@ function updateLocalStorage()
 
 //------------------------------------------------------------------------------
 
-function updateAppFromLocalStorage()
+function updateAppDataFromLocalStorage()
 {
     const dataStr = localStorage.getItem("wdw-data-" + gSchemaVersion);
 
@@ -79,7 +94,25 @@ function updateAppFromLocalStorage()
 
         gResps = data.resps;
         gTeam  = data.team;
+        
+        gRespsIDCounter = gResps.length > 0 ? findMaxID(gResps) + 1 : 0;
+        gTeamIDCounter  = gTeam.length  > 0 ? findMaxID(gResps) + 1 : 0;
     }
+}
+
+//------------------------------------------------------------------------------
+
+function findResp(id)
+{
+    for (const r of gResps)
+    {
+        if (r.id == id)
+        {
+            return r;
+        }
+    }
+
+    return null;
 }
 
 //------------------------------------------------------------------------------
@@ -189,16 +222,95 @@ function addToDOM(tree, parent)
     {
         addToDOM(child, e);
     }
+
+    return e;
+}
+
+//------------------------------------------------------------------------------
+
+function initDropCallbacks(z)
+{    
+    z.ondragenter = (e) =>
+    {
+        if (!allowsDrop(e.target))
+        {
+            return false;
+        }
+      
+        e.target.classList.add("flashingDropZone");
+    };
+
+    z.ondragover = (e) =>
+    {
+        if (!allowsDrop(e.target))
+        {                
+            return false;
+        }
+        
+        e.preventDefault();            
+        e.dataTransfer.dropEffect = "move"
+    };
+
+    z.ondragleave = (e) =>
+    {            
+        if (!allowsDrop(e.target))
+        {
+            return false;
+        }
+
+        e.target.classList.remove("flashingDropZone");
+    };
+
+    z.ondrop = (e) =>
+    {
+        if (!allowsDrop(e.target))
+        {
+            return false;
+        }
+                    
+        e.target.classList.remove("flashingDropZone");
+
+        const dropData = e.dataTransfer.getData("text");
+
+        const respElem = document.getElementById(dropData);
+        e.target.appendChild(respElem);
+
+        // adapt data model & scores            
+        if (e.target.classList.contains("respHolderDropArea"))
+        {
+            const teamMemberID = Number(e.target.parentElement.id.substring(2));
+            const t = findTeamMember(teamMemberID);
+            
+            // find and transfer responsibility
+            const respID = Number(respElem.id.substring(2));            
+            const r      = findResp(respID);
+            
+            const tOld = (r.teamMemberID != -1 ? findTeamMember(r.teamMemberID) : null);
+
+            t.respIDs.push(respID);            
+            if (tOld)
+            {
+                tOld.respIDs = tOld.respIDs.filter(e => e !== respID);
+            }
+            
+            r.teamMemberID = teamMemberID;
+
+            //TODO: implement scoring
+            //const wlBarID = "#t" + teamMemberID + "WorkloadBar";
+            //... e.target.parent.querySelectorAll(".respHolderScoring");
+
+            updateLocalStorage();
+        }
+    };
 }
 
 //------------------------------------------------------------------------------
 
 function init()
 {
-    //TODO: INIT SHOULD BE CALLED ONLY ONCE AND THEN WE DON'T NEED A HACK
     if (gResps.length == 0 && gTeam.length == 0)
     {
-        updateAppFromLocalStorage();
+        updateAppDataFromLocalStorage();
 
         for (const r of gResps)
         {
@@ -209,88 +321,6 @@ function init()
         {
             createOrUpdateTeamMember(t.id, t);
         }
-    }
-
-    // drag start behavior
-    const draggables = document.querySelectorAll(".draggableResp");
-
-    for (const d of draggables)
-    {
-        d.ondragstart = (e) =>
-        {
-            e.dataTransfer.setData("text", e.target.id);
-            e.dataTransfer.effectAllowed = "move";        
-        };
-    }
-
-    // drop behavior
-    const dropZones = document.querySelectorAll(".respHolderDropArea");
-    
-    for (const z of dropZones)
-    {
-        z.ondragenter = (e) =>
-        {
-            if (!allowsDrop(e.target))
-            {
-                return false;
-            }
-            
-            //e.preventDefault();
-            e.target.classList.add("flashingDropZone");
-        };
-
-        z.ondragover = (e) =>
-        {
-            if (!allowsDrop(e.target))
-            {                
-                return false;
-            }
-            
-            e.preventDefault();            
-            e.dataTransfer.dropEffect = "move"
-        };
-
-        z.ondragleave = (e) =>
-        {            
-            if (!allowsDrop(e.target))
-            {
-                return false;
-            }
-
-            //e.preventDefault();
-            e.target.classList.remove("flashingDropZone");
-        };
-
-        z.ondrop = (e) =>
-        {
-            if (!allowsDrop(e.target))
-            {
-                return false;
-            }
-            
-            //e.preventDefault();
-            e.target.classList.remove("flashingDropZone");
-
-            const dropData = e.dataTransfer.getData("text");
-            const respElem = document.getElementById(dropData)
-            e.target.appendChild(respElem);
-
-            // adapt scores            
-            if (e.target.classList.contains("respHolderDropArea"))
-            {
-                const teamMemberID = Number(e.target.parentElement.id.substring(2));
-                const t = findTeamMember(teamMemberID);
-                
-                const wlBarID = "#t" + teamMemberID + "WorkloadBar";
-
-                //TODO: find and transfer responsibility
-                //t.responsibilities.push(...);
-
-                updateLocalStorage();
-            }
-            
-            //... e.target.parent.querySelectorAll(".respHolderScoring");
-        };
     }
 }
 
@@ -321,12 +351,7 @@ function createOrUpdateResponsibility(id, rData)
                                                       document.querySelector("#respNameInput").value,
                                                       "",
                                                       document.querySelector("#respHoursInput").value + "h / week"));
-        
-        if (!rData)
-        {
-            gResps.push(r);
-        }
-
+ 
         const newRespHTML = 
         [
             "div", { "class" : "draggableResp", draggable: "true", id : htmlID}, "",
@@ -336,10 +361,19 @@ function createOrUpdateResponsibility(id, rData)
             ]
         ];
 
-        addToDOM(newRespHTML, document.querySelector("#respCreationArea"));
+        const newHTMLElem = addToDOM(newRespHTML, document.querySelector("#respCreationArea"));
 
-        //TODO: DIRTY - SHOULD JUST ADD THE NECESSARY CALLBACKS
-        init();
+        newHTMLElem.ondragstart = (e) =>
+        {
+            e.dataTransfer.setData("text", e.target.id);
+            e.dataTransfer.effectAllowed = "move";        
+        };
+
+        // new element just created
+        if (!rData)
+        {
+            gResps.push(r);
+        }
     }
     // TODO: MAKE EDITABLE LATER (CURRENTLY WE CAN ONLY RE-CREATE ITEMS)
     // responsibility exists -> update element
@@ -366,11 +400,6 @@ function createOrUpdateTeamMember(id, tData)
                                                   document.querySelector("#teamMemberHoursInput").value,
                                                   0, 0));
 
-        if (!tData)
-        {
-            gTeam.push(t);
-        }        
-
         const newTeamMember = 
         [
             "div", { "class" : "respHolder", id : htmlID}, "",
@@ -382,11 +411,27 @@ function createOrUpdateTeamMember(id, tData)
                 //constructScoreBarTree("Workload:", htmlID + "WorkloadBar")
             ]
         ];
+        
+        const newHTMLElem  = addToDOM(newTeamMember, document.querySelector("#teamCanvas"));
+        const dropAreaElem = newHTMLElem.querySelector(".respHolderDropArea");
 
-        addToDOM(newTeamMember, document.querySelector("#teamCanvas"));
-
-        //TODO: DIRTY - SHOULD JUST ADD THE NECESSARY CALLBACKS
-        init();
+        // loaded already existing data?
+        if (tData)
+        {           
+            // init responsibilities, if any
+            for (const rID of t.respIDs)
+            {
+                const respElem = document.getElementById("#r" + rID);
+                dropAreaElem.appendChild(respElem);
+            }
+        }
+        // new element just created
+        else
+        {
+            gTeam.push(t);
+        }
+        
+        initDropCallbacks(dropAreaElem);
     }
     // TODO: MAKE EDITABLE LATER (CURRENTLY WE CAN ONLY RE-CREATE ITEMS)
     // team member exists -> update element
