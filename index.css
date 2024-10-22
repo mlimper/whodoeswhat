@@ -18,6 +18,12 @@ html
     --primary-Btn-border-width: 0.15rem;    
     --primary-Btn-border-color: white;
 
+    --content-col-0: rgb(3, 67, 67);
+    --content-col-0-var: rgb(2, 84, 63);
+    --content-col-0-dk: rgb(12, 54, 77);
+    --content-col-0-lt: rgb(9, 121, 111);
+    --content-col-0-txt:rgb(187, 238, 238);
+
     font-family: 'Trebuchet MS', Arial, sans-serif;
     color: white;
     user-select: none;
@@ -80,6 +86,7 @@ html, body
 {
     visibility: hidden;
     position: fixed;
+    text-align: center;
     width: 20rem;
     height:  12rem;
     left: calc(50% - 10rem);
@@ -188,20 +195,44 @@ h1
 }*/
 
 .draggableResp
-{
+{    
     justify-self: center;    
     width: var(--draggable-Resp-size);
     height: var(--draggable-Resp-size);                
     text-align: center;
-    color: rgb(187, 238, 238);
-    border: 0.15rem solid rgb(3, 67, 67);
+    color: var(--content-col-0-txt);
+    border: 0.05rem solid var(--content-col-0);
     border-radius: var(--primary-border-radius);    
-    background: linear-gradient(rgb(2, 84, 63), rgb(12, 54, 77));
+    background: linear-gradient(var(--content-col-0-var), var(--content-col-0-dk));
+}
+
+.draggableResp:hover
+{ 
+    background: linear-gradient(var(--content-col-0-lt), var(--content-col-0-var));
+}
+
+.draggableRespX
+{   
+    height: 0.5rem;
+    width: 0.5rem;
+    padding: 0.2rem;
+    margin: 0.15rem;
+    font-size: 0.5rem;    
+    border-radius: var(--primary-border-radius);
+    margin-left: calc(var(--draggable-Resp-size) - 1rem);
+    color: var(--content-col-0-txt);
+    background: var(--content-col-0);  
+}
+
+.draggableRespX:hover
+{    
+    cursor: pointer;
+    background: var(--content-col-0-var);
 }
 
 .draggableRespTitle
 {
-    margin-top: 1rem;
+    margin-top: 0.7rem;
     height: 4.5rem;
     font-weight: bold;
 }
@@ -216,7 +247,7 @@ button:hover
     cursor: pointer;
 }
 
-.newElemBtn, #newRespBtn
+.newElemBtn, .dialogBtn
 {
     width: 100%;
     height: 2rem;
@@ -226,6 +257,18 @@ button:hover
     font-weight: bold;
     background-color: var(--primary-Btn-color);
     border-radius: var(--primary-border-radius);
+}
+
+.dialogBtn
+{
+    width: 40%;
+    margin: 0.25rem;
+}
+
+#confirmDialogText
+{
+    height: 5rem;
+    padding: 1rem;
 }
 
 *[draggable=true]

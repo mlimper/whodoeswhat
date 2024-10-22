@@ -23,7 +23,7 @@
                     <input id="respHoursInput" type="number" value="8"></input><br>
                     <label for="respHoursInput">h / week</label>
                 </div>
-                <button id="newRespBtn" onclick="createRespBtnClicked()">Create</button>
+                <button class="dialogBtn" onclick="createRespBtnClicked()">Create</button>
             </div>                        
         </div>
 
@@ -43,8 +43,18 @@
                     <input id="teamMemberHoursInput" type="number" value="8"></input><br>
                     <label for="teamMemberHoursInput">h / week</label>
                 </div>
-                <button id="newRespBtn" onclick="createTeamMemberBtnClicked()">Create</button>
+                <button class="dialogBtn" onclick="createTeamMemberBtnClicked()">Create</button>
             </div>                        
+        </div>
+
+        <!-- DIALOG: CONFIRM CHOICE -->
+        <div id="confirmDialog" class="dialog">
+            <div id="confirmDialogHeaderBar" class="dialogHeaderBar">Confirm Choice</div>
+            <div id="confirmDialogText">
+                Please confirm
+            </div>
+            <button id="confirmDialogOKBtn" class="dialogBtn" onclick="gConfirmDialogCallback(true)">OK</button>
+            <button id="confirmDialogCancelBtn" class="dialogBtn" onclick="gConfirmDialogCallback(false)">Cancel</button>
         </div>
 
         <!-- TEAM CANVAS -->
