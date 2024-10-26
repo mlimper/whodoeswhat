@@ -211,23 +211,40 @@ h1
     background: linear-gradient(var(--content-col-0-lt), var(--content-col-0-var));
 }
 
-.draggableRespX
+.draggableRespX, .respHolderX
 {   
     height: 0.5rem;
     width: 0.5rem;
     padding: 0.2rem;
-    margin: 0.15rem;
     font-size: 0.5rem;    
     border-radius: var(--primary-border-radius);
+}
+
+.draggableRespX
+{
+    margin: 0.15rem;
     margin-left: calc(var(--draggable-Resp-size) - 1rem);
     color: var(--content-col-0-txt);
     background: var(--content-col-0);  
+}
+
+.respHolderX
+{    
+    margin: 0;
+    margin-left: calc(2 * var(--draggable-Resp-size) + 1.8rem);
+    background-color: var(--team-canvas-background);
 }
 
 .draggableRespX:hover
 {    
     cursor: pointer;
     background: var(--content-col-0-var);
+}
+
+.respHolderX:hover
+{    
+    cursor: pointer;
+    background: var(--creation-panel-line-color);
 }
 
 .draggableRespTitle
@@ -282,7 +299,7 @@ button:hover
     justify-self: center; 
     overflow: hidden;      
     height: calc(2 * var(--draggable-Resp-size) + 10rem);
-    padding: 1rem;
+    padding: 0.5rem 1rem 1rem 1rem;
     margin: 1rem;
     border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);  
     background: var(--creation-panel-background);
@@ -339,7 +356,7 @@ button:hover
     width: calc(100% - 6.2rem);
     padding: 0.1rem;
     text-align: center;    
-    background: linear-gradient(90deg,rgb(102, 117, 111) 50%, black 50%);
+    background: linear-gradient(90deg,rgb(102, 117, 111) 0%, black 0%);
 }
 
 .scoreBarLabel

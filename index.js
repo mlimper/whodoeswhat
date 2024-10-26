@@ -1,13 +1,12 @@
 //TODO:
-// TRASH BUTTON TEAM
-// TRASH BUTTON RESP
+// DELETE TEAM MEMBER BUTTON
 // EDIT BUTTON TEAM
 // EDIT BUTTON RESP
 
 const gSchemaVersion = "0.1-dev";
 
 //------------------------------------------------------------------------------
-// data structures
+// DATA STRUCTURES
 //------------------------------------------------------------------------------
 
 class Responsibility
@@ -40,7 +39,7 @@ class TeamMember
 }
 
 //------------------------------------------------------------------------------
-// global variables
+// GLOBAL VARIABLES
 //------------------------------------------------------------------------------
 
 let gRespsIDCounter = 0;
@@ -62,7 +61,11 @@ let gTeam = [];
 let gConfirmDialogCallback = (choice) => { toggleDialog("confirmDialog", false); };
 
 //------------------------------------------------------------------------------
-// functions
+// FUNCTIONS
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+// data handling
 //------------------------------------------------------------------------------
 
 function findMaxID(objArr)
@@ -76,34 +79,6 @@ function findMaxID(objArr)
 
     return maxVal;
 }
-
-//------------------------------------------------------------------------------
-
-function updateLocalStorage()
-{
-    const data = JSON.stringify({ "resps" : gResps, "team" : gTeam });
-    
-    localStorage.setItem("wdw-data-" + gSchemaVersion, data);
-}
-
-//------------------------------------------------------------------------------
-
-function updateAppDataFromLocalStorage()
-{
-    const dataStr = localStorage.getItem("wdw-data-" + gSchemaVersion);
-
-    if (dataStr)
-    {
-        const data = JSON.parse(dataStr);
-
-        gResps = data.resps;
-        gTeam  = data.team;
-        
-        gRespsIDCounter = gResps.length > 0 ? findMaxID(gResps) + 1 : 0;
-        gTeamIDCounter  = gTeam.length  > 0 ? findMaxID(gResps) + 1 : 0;
-    }
-}
-
 //------------------------------------------------------------------------------
 
 function findResp(id)
@@ -135,6 +110,37 @@ function findTeamMember(id)
 }
 
 //------------------------------------------------------------------------------
+// loading / saving
+//------------------------------------------------------------------------------
+
+function updateLocalStorage()
+{
+    const data = JSON.stringify({ "resps" : gResps, "team" : gTeam });
+    
+    localStorage.setItem("wdw-data-" + gSchemaVersion, data);
+}
+
+//------------------------------------------------------------------------------
+
+function updateAppDataFromLocalStorage()
+{
+    const dataStr = localStorage.getItem("wdw-data-" + gSchemaVersion);
+
+    if (dataStr)
+    {
+        const data = JSON.parse(dataStr);
+
+        gResps = data.resps;
+        gTeam  = data.team;
+        
+        gRespsIDCounter = gResps.length > 0 ? findMaxID(gResps) + 1 : 0;
+        gTeamIDCounter  = gTeam.length  > 0 ? findMaxID(gResps) + 1 : 0;
+    }
+}
+
+//------------------------------------------------------------------------------
+// ui utilities
+//------------------------------------------------------------------------------
 
 function toggleDialog(elemID, toggleState)
 {
@@ -154,79 +160,6 @@ function launchConfirmationDialog(text, callback)
     };
 
     toggleDialog("confirmDialog", true);
-}
-
-//------------------------------------------------------------------------------
-
-function respDialogXClicked()
-{
-    toggleDialog("createRespDialog", false);
-}
-
-//------------------------------------------------------------------------------
-
-function createRespBtnClicked()
-{
-    createOrUpdateResponsibility(gRespsIDCounter);
-    ++gRespsIDCounter;
-    toggleDialog("createRespDialog", false);
-}
-
-//------------------------------------------------------------------------------
-
-function newRespBtnClicked()
-{
-    toggleDialog("createRespDialog", true);
-}
-
-//------------------------------------------------------------------------------
-
-function teamMemberDialogXClicked()
-{
-    toggleDialog("createTeamMemberDialog", false);
-}
-
-//------------------------------------------------------------------------------
-
-function createTeamMemberBtnClicked()
-{
-    createOrUpdateTeamMember(gTeamIDCounter);
-    ++gTeamIDCounter;
-    toggleDialog("createTeamMemberDialog", false);
-}
-
-//------------------------------------------------------------------------------
-
-function newTeamMemberBtnClicked()
-{
-    toggleDialog("createTeamMemberDialog", true);
-}
-
-//------------------------------------------------------------------------------
-
-function respXClicked(respID)
-{
-    const rIDNum = Number(respID.substring(1));
-    const r      = findResp(rIDNum);
-
-    launchConfirmationDialog("Delete responsibility \"" + r.title + "\"?",
-                             (choice) => {
-                                // perform deletion
-                                if (choice)
-                                {
-                                    if (r.teamMemberID != -1)
-                                    {
-                                        const t   = findTeamMember(r.teamMemberID);
-                                        t.respIDs = t.respIDs.filter(e => e !== rIDNum);
-                                    }
-
-                                    document.getElementById(respID).remove();
-                                    
-                                    gResps = gResps.filter(resp => resp.id !== rIDNum);
-
-                                    updateLocalStorage();
-                                }
-                             });
 }
 
 //------------------------------------------------------------------------------
@@ -269,6 +202,19 @@ function addToDOM(tree, parent)
     }
 
     return e;
+}
+
+//------------------------------------------------------------------------------
+
+function constructScoreBarTree(title, id)
+{
+    return [
+        "div", {"id" : id, "class" : "respHolderScoring"}, "", [
+            ["span", {"class" : "respHolderScoringLabel"}, title, []],
+            ["span", {"class" : "scoreBar"},"", [
+                ["span", {"class" : "scoreBarLabel"}, "0", []]
+            ]]
+    ]];
 }
 
 //------------------------------------------------------------------------------
@@ -320,41 +266,128 @@ function initDropCallbacks(z)
         const respElem = document.getElementById(dropData);
         e.target.appendChild(respElem);
 
-        // adapt data model & scores            
-        if (e.target.classList.contains("respHolderDropArea"))
-        {
-            const teamMemberID = Number(e.target.parentElement.id.substring(1));
-            const t = findTeamMember(teamMemberID);
-            
-            // find and transfer responsibility
-            const respID = Number(respElem.id.substring(1));
-            const r      = findResp(respID);
-            
-            let tOld = (r.teamMemberID != -1 ? findTeamMember(r.teamMemberID) : null);
-
-            if (tOld === t)
-            {
-                console.warn("Inconsistent state: responsibility transferred to same team member.");
-                tOld = null;
-            }
-
-            t.respIDs.push(respID);            
-            if (tOld)
-            {
-                tOld.respIDs = tOld.respIDs.filter(e => e !== respID);
-            }
-            
-            r.teamMemberID = teamMemberID;
-
-            //TODO: implement scoring
-            //const wlBarID = "t" + teamMemberID + "WorkloadBar";
-            //... e.target.parent.querySelectorAll(".respHolderScoring");
-
-            updateLocalStorage();
-        }
+        // find and transfer responsibility
+        const respID = Number(respElem.id.substring(1));
+        const r      = findResp(respID);
+        
+        const teamMemberID = Number(e.target.parentElement.id.substring(1));
+        const t = findTeamMember(teamMemberID);
+        
+        let tOld = (r.teamMemberID != -1 ? findTeamMember(r.teamMemberID) : null);
+        
+        transferResponsibility(r, t, tOld);
     };
 }
 
+//------------------------------------------------------------------------------
+// ui callbacks
+//------------------------------------------------------------------------------
+
+function respDialogXClicked()
+{
+    toggleDialog("createRespDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function createRespBtnClicked()
+{
+    createOrUpdateResponsibility(gRespsIDCounter);
+    ++gRespsIDCounter;
+    toggleDialog("createRespDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function newRespBtnClicked()
+{
+    toggleDialog("createRespDialog", true);
+}
+
+//------------------------------------------------------------------------------
+
+function teamMemberDialogXClicked()
+{
+    toggleDialog("createTeamMemberDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function createTeamMemberBtnClicked()
+{
+    createOrUpdateTeamMember(gTeamIDCounter);
+    ++gTeamIDCounter;
+    toggleDialog("createTeamMemberDialog", false);
+}
+
+//------------------------------------------------------------------------------
+
+function newTeamMemberBtnClicked()
+{
+    toggleDialog("createTeamMemberDialog", true);
+}
+
+//------------------------------------------------------------------------------
+
+function respXClicked(respIDHTML)
+{
+    const rIDNum = Number(respIDHTML.substring(1));
+    const r      = findResp(rIDNum);
+
+    launchConfirmationDialog("Delete responsibility \"" + r.title + "\"?",
+                             (choice) => {
+                                // perform deletion
+                                if (choice)
+                                {
+                                    if (r.teamMemberID != -1)
+                                    {
+                                        const t   = findTeamMember(r.teamMemberID);
+                                        t.respIDs = t.respIDs.filter(e => e !== rIDNum);
+                                        updateWorkloadScore(t);
+                                    }
+
+                                    document.getElementById(respIDHTML).remove();
+                                    
+                                    gResps = gResps.filter(resp => resp.id !== rIDNum);
+
+                                    updateLocalStorage();
+                                }
+                             });
+}
+
+//------------------------------------------------------------------------------
+
+function teamMemberXClicked(teamMemberIDHTML)
+{
+    const tIDNum = Number(teamMemberIDHTML.substring(1));
+    const t      = findTeamMember(tIDNum);
+
+    launchConfirmationDialog("Delete team member \"" + t.name + "\"?",
+                             (choice) => {
+                                // perform deletion
+                                if (choice)
+                                {
+                                    // un-assign responsibilities (=> to backlog)
+                                    for (const rID of t.respIDs)
+                                    {
+                                        const r = findResp(rID);
+                                        r.teamMemberID = -1;
+
+                                        const rElem = document.getElementById("r" + rID);
+                                        document.getElementById("respCreationArea").appendChild(rElem);
+                                    }
+
+                                    document.getElementById(teamMemberIDHTML).remove();
+                                    
+                                    gTeam = gTeam.filter(tm => tm.id !== tIDNum);
+
+                                    updateLocalStorage();
+                                }
+                             });
+}
+
+//------------------------------------------------------------------------------
+// general
 //------------------------------------------------------------------------------
 
 function init()
@@ -377,19 +410,6 @@ function init()
 
 //------------------------------------------------------------------------------
 
-function constructScoreBarTree(title, id)
-{
-    return [
-        "div", {"id" : id, "class" : "respHolderScoring"}, "", [
-            ["span", {"class" : "respHolderScoringLabel"}, title, []],
-            ["span", {"class" : "scoreBar"},"", [
-                ["span", {"class" : "scoreBarLabel"}, "0", []]
-            ]]
-    ]];
-}
-
-//------------------------------------------------------------------------------
-
 function createOrUpdateResponsibility(id, rData)
 {
     const htmlID = "r" + id;
@@ -398,15 +418,15 @@ function createOrUpdateResponsibility(id, rData)
     const r = (rData ? rData : new Responsibility(gRespsIDCounter,
                                                   document.querySelector("#respNameInput").value,
                                                   "",
-                                                  document.querySelector("#respHoursInput").value + "h / week"));
+                                                  Number(document.querySelector("#respHoursInput").value)));
 
     const newRespHTML = 
     [
         "div", { "class" : "draggableResp", draggable: "true", id : htmlID}, "",
         [
             ["div", {"class" : "draggableRespX", "onclick" : `respXClicked('${htmlID}')`}, "X", []],
-            ["div", {"class" : "draggableRespTitle"},    r.title,       []],
-            ["div", {"class" : "draggableRespSubtitle"}, r.weeklyHours, []]
+            ["div", {"class" : "draggableRespTitle"},    r.title,                    []],
+            ["div", {"class" : "draggableRespSubtitle"}, r.weeklyHours + "h / week", []]
         ]
     ];
 
@@ -449,18 +469,19 @@ function createOrUpdateTeamMember(id, tData)
                                                   document.querySelector("#teamMemberNameInput").value,
                                                   document.querySelector("#teamMemberPositionInput").value,
                                                   [],
-                                                  document.querySelector("#teamMemberHoursInput").value,
+                                                  Number(document.querySelector("#teamMemberHoursInput").value),
                                                   0, 0));
 
         const newTeamMember = 
         [
             "div", { "class" : "respHolder", id : htmlID}, "",
             [
+                ["div", {"class" : "respHolderX", "onclick" : `teamMemberXClicked('${htmlID}')`}, "X", []],
                 ["div", {"class" : "respHolderTitle"},    t.name,  []],
                 ["div", {"class" : "respHolderSubtitle"}, t.title, []],
                 ["div", {"class" : "respHolderDropArea dropTarget"}, "",   []],
                 //constructScoreBarTree("Focus:"),
-                //constructScoreBarTree("Workload:", htmlID + "WorkloadBar")
+                constructScoreBarTree("Workload:", htmlID + "WorkloadBar")
             ]
         ];
         
@@ -483,6 +504,8 @@ function createOrUpdateTeamMember(id, tData)
                     console.warn("Invalid data: cannot find responsibility with ID " + rID);
                 }
             }
+
+            updateWorkloadScore(t);
         }
         // new element just created
         else
@@ -498,6 +521,52 @@ function createOrUpdateTeamMember(id, tData)
     {
         //...
     }
+}
+
+//------------------------------------------------------------------------------
+
+function updateWorkloadScore(teamMember)
+{
+    let hours = 0;
+
+    for (const rID of teamMember.respIDs)
+    {
+        const r = findResp(rID);
+        hours += r.weeklyHours;
+    }
+
+    const hoursPerc        = +(100 * (hours / teamMember.weeklyHourBudget)).toFixed(2);
+    const scoreBarStyleStr = `linear-gradient(90deg,rgb(102, 117, 111) ${hoursPerc}%, black ${hoursPerc}%)`;
+
+    const tElem = document.getElementById("t" + teamMember.id);
+
+    tElem.querySelector(".scoreBarLabel").innerText   = hoursPerc;
+    tElem.querySelector(".scoreBar").style.background = scoreBarStyleStr;
+}
+
+//------------------------------------------------------------------------------
+
+function transferResponsibility(resp, teamMember, teamMemberOld)
+{
+    if (teamMemberOld === teamMember)
+    {
+        console.warn("Inconsistent state: responsibility transferred to same team member.");
+        teamMemberOld = null;
+    }
+
+    resp.teamMemberID = teamMember.id;
+
+    teamMember.respIDs.push(resp.id);
+    updateWorkloadScore(teamMember);
+
+    if (teamMemberOld)
+    {
+        teamMemberOld.respIDs = teamMemberOld.respIDs.filter(e => e !== resp.id);
+        updateWorkloadScore(teamMemberOld);
+    }
+    
+    // save updated state to local storage
+    updateLocalStorage();
 }
 
 //------------------------------------------------------------------------------
