@@ -420,6 +420,11 @@ function createOrUpdateResponsibility(id, rData)
                                                   "",
                                                   Number(document.querySelector("#respHoursInput").value)));
 
+    // TODO: sanitizing steps should not be necessary once schema is stable
+    r.weeklyHours = Number(r.weeklyHours);
+    if (isNaN(r.weeklyHours)) { r.weeklyHours = 8};
+    //
+
     const newRespHTML = 
     [
         "div", { "class" : "draggableResp", draggable: "true", id : htmlID}, "",
@@ -481,7 +486,7 @@ function createOrUpdateTeamMember(id, tData)
                 ["div", {"class" : "respHolderSubtitle"}, t.title, []],
                 ["div", {"class" : "respHolderDropArea dropTarget"}, "",   []],
                 //constructScoreBarTree("Focus:"),
-                constructScoreBarTree("Workload:", htmlID + "WorkloadBar")
+                constructScoreBarTree("Assigned:", htmlID + "WorkloadBar")
             ]
         ];
         

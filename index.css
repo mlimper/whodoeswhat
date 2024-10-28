@@ -305,6 +305,9 @@ button:hover
     background: var(--creation-panel-background);
     border-radius: var(--primary-border-radius);
     text-align: center;
+    -webkit-box-shadow: 3px 0px 6px 3px rgba(0,0,0,0.15);
+    -moz-box-shadow: 3px 0px 6px 3px rgba(0,0,0,0.15);
+    box-shadow: 3px 0px 6px 3px rgba(0,0,0,0.15);
 }
 
 .respHolderTitle, .respHolderSubtitle, .respHolderScoring
@@ -357,6 +360,7 @@ button:hover
     padding: 0.1rem;
     text-align: center;    
     background: linear-gradient(90deg,rgb(102, 117, 111) 0%, black 0%);
+    border-radius: var(--primary-border-radius);
 }
 
 .scoreBarLabel
