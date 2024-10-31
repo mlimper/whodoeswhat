@@ -1,18 +1,22 @@
 <html>
 
     <head>
-        <title>Who Does What</title>
+        <title>🎯 Who Does What</title>
         <link rel="stylesheet" href="index.css">
         <script src="index.js"></script>
     </head>
 
-    <body onload="init()">                
+    <body onload="init()">       
+
+        <!-- HIDDEN ELEMENTS FOR LOAD / SAVE FUNCTIONALITY -->       
+        <input id="uploadInputElem" type="file" accept=".json" onchange="fileLoadSelected()" style="display:none">
+        <a id="downloadAnchorElem" style="display:none"></a>
         
         <div id="modalBackdrop"></div>
         
         <!-- DIALOG: NEW RESPONSIBILITY -->
         <div id="createRespDialog" class="dialog">  
-            <div class="dialogHeaderBar">New Responsibility
+            <div class="dialogHeaderBar">New Objective
                 <button class="dialogButtonX" onclick="respDialogXClicked()">X</button>
             </div>
             <div class="dialogInput">                
@@ -59,6 +63,7 @@
 
         <!-- TEAM CANVAS -->
         <div id="teamCanvas">
+            <!-- team members go here -->
         </div>
 
         <!-- CREATION PANEL -->
@@ -67,43 +72,26 @@
             <h1>Who Does What // v0.1-dev</h1>
 
             <div class="toolPanelSection">
+                <button class="toolBtn" onclick="loadBtnClicked()">💾 Load</button>
+                <button class="toolBtn" onclick="saveBtnClicked()">💾 Save</button>
+                <button class="toolBtn" onclick="unlockEditing()">🔒/🔓</button>
+            </div>
 
-                <div id="respCreationArea">                    
-                    
-                    <!--div class="draggableResp" draggable="true" id="r0">
-                        <div class="draggableRespTitle">Accounting: Invoices</div>
-                        <div class="draggableRespSubtitle">4h / week</div>
-                    </div>
+            <div class="toolPanelSection">
 
-                    <div class="draggableResp" draggable="true" id="r1">
-                        <div class="draggableRespTitle">HR: Contracting</div>
-                        <div class="draggableRespSubtitle">4h / week</div>
-                    </div>
+                <h2>Objectives Backlog</h2>
 
-                    <div class="draggableResp" draggable="true" id="r2">
-                        <div class="draggableRespTitle">Marketing: Blog &amp; Articles</div>
-                        <div class="draggableRespSubtitle">16h / week</div>
-                    </div>
-
-                    <div class="draggableResp" draggable="true" id="r3">
-                        <div class="draggableRespTitle">Management: Team Goals</div>
-                        <div class="draggableRespSubtitle">4h / week</div>
-                    </div>
-
-                    <div class="draggableResp" draggable="true" id="r4">
-                        <div class="draggableRespTitle">Marketing: Website</div>
-                        <div class="draggableRespSubtitle">8h / week</div>
-                    </div-->
-
+                <div id="respCreationArea">
+                    <!-- objectives go here -->
                 </div>
 
-                <button class="newElemBtn" onclick="newRespBtnClicked()">New Responsibility</button>
+                <button class="newElemBtn" onclick="newRespBtnClicked()">🎯New Objective</button>
 
             </div>
 
             <div class="toolPanelSection">
 
-                <button class="newElemBtn" onclick="newTeamMemberBtnClicked()">New Team Member</button>
+                <button class="newElemBtn" onclick="newTeamMemberBtnClicked()">🏋️ New Team Member</button>
 
             </div>
 

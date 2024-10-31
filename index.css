@@ -13,9 +13,12 @@ html
 
     --draggable-Resp-size: 8rem;
 
-    --primary-Btn-color: #333;    
-    --primary-Btn-text-color: white;
-    --primary-Btn-border-width: 0.15rem;    
+    --primary-Btn-color: #333;
+    --primary-Btn-color-lighter: #3f3f3f;
+    --primary-Btn-hover-color: #555;
+    --primary-Btn-hover-color-lighter: #666;
+    --primary-Btn-text-color: #ddd;
+    --primary-Btn-border-width: 0.1rem;    
     --primary-Btn-border-color: white;
 
     --content-col-0: rgb(3, 67, 67);
@@ -128,6 +131,9 @@ html, body
 
 .dialogButtonX
 {
+    height: 1rem;
+    min-width: 1rem;
+    font-size: 65%;
     position: absolute;
     right: 0.6rem;
     font-weight: bold;
@@ -139,16 +145,19 @@ html, body
 
 h1
 {    
-    padding: 0.75rem;
+    font-size: x-large;
+    padding: 0.5rem;
     margin: 0;
     font-weight: 100;
     color: #666;
     background-color: #111;    
 }
 
- h2
+h2
 {
-    margin: 0.2rem 0;    
+    color: #666;
+    font-size: large;
+    margin: 0 0 0.5rem;
 }
 
 .toolPanelSection, #respCreationArea
@@ -158,7 +167,7 @@ h1
 
 .toolPanelSection
 {
-    padding: 1rem;
+    padding: 0.75rem;
 }
 
 #respCreationArea, .respHolderDropArea
@@ -167,7 +176,7 @@ h1
     gap: 1rem;    
     grid-auto-rows: var(--draggable-Resp-size); 
     padding: 0.8rem;
-    height: calc(100% - 18rem);    
+    height: calc(100% - 20rem);    
     margin: 0 0 1rem 0;      
     border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);  
     border-radius: var(--primary-border-radius);
@@ -254,26 +263,33 @@ h1
     font-weight: bold;
 }
 
-.draggableRespsSubtitle
+.draggableRespSubtitle
 {
-    margin-top: 1rem;    
+    display: none; /* disabled for now */    
+}
+
+button
+{    
+    height: 2.2rem;
+    min-width: 5.5rem;
+    _border: var(--primary-Btn-border-width) solid var(--primary-Btn-border-color);
+    border: 0;
+    color: var(--primary-Btn-text-color);
+    font-size: 100%;
+    font-weight: bold;
+    background: linear-gradient(var(--primary-Btn-color-lighter), var(--primary-Btn-color));
+    border-radius: var(--primary-border-radius);
 }
 
 button:hover
 {
+    background: linear-gradient(var(--primary-Btn-hover-color-lighter), var(--primary-Btn-hover-color));
     cursor: pointer;
 }
 
-.newElemBtn, .dialogBtn
+.newElemBtn
 {
     width: 100%;
-    height: 2rem;
-    border: var(--primary-Btn-border-width) solid var(--primary-Btn-border-color);
-    color: var(--primary-Btn-text-color);
-    font-size: 105%;
-    font-weight: bold;
-    background-color: var(--primary-Btn-color);
-    border-radius: var(--primary-border-radius);
 }
 
 .dialogBtn
@@ -343,6 +359,7 @@ button:hover
 
 .respHolderScoring
 {
+    display: none; /* disabled for now */
     width: 100%;    
     text-align: left;
 }

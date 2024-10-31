@@ -3,6 +3,28 @@
 // EDIT BUTTON TEAM
 // EDIT BUTTON RESP
 
+//TODO: pw protected files
+/*
+    https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt
+    function getMessageEncoding() {
+    const messageBox = document.querySelector(".aes-gcm #message");
+    const message = messageBox.value;
+    const enc = new TextEncoder();
+    return enc.encode(message);
+  }
+  
+  function encryptMessage(key) {
+    const encoded = getMessageEncoding();
+    // iv will be needed for decryption
+    const iv = window.crypto.getRandomValues(new Uint8Array(12));
+    return window.crypto.subtle.encrypt(
+      { name: "AES-GCM", iv: iv },
+      key,
+      encoded,
+    );
+  }
+*/
+
 const gSchemaVersion = "0.1-dev";
 
 //------------------------------------------------------------------------------
@@ -110,6 +132,17 @@ function findTeamMember(id)
 }
 
 //------------------------------------------------------------------------------
+
+function updateAppData(data)
+{
+    gResps = data.resps;
+    gTeam  = data.team;
+    
+    gRespsIDCounter = gResps.length > 0 ? findMaxID(gResps) + 1 : 0;
+    gTeamIDCounter  = gTeam.length  > 0 ? findMaxID(gResps) + 1 : 0;
+}
+
+//------------------------------------------------------------------------------
 // loading / saving
 //------------------------------------------------------------------------------
 
@@ -128,13 +161,7 @@ function updateAppDataFromLocalStorage()
 
     if (dataStr)
     {
-        const data = JSON.parse(dataStr);
-
-        gResps = data.resps;
-        gTeam  = data.team;
-        
-        gRespsIDCounter = gResps.length > 0 ? findMaxID(gResps) + 1 : 0;
-        gTeamIDCounter  = gTeam.length  > 0 ? findMaxID(gResps) + 1 : 0;
+        updateAppData(JSON.parse(dataStr));
     }
 }
 
@@ -281,6 +308,49 @@ function initDropCallbacks(z)
 
 //------------------------------------------------------------------------------
 // ui callbacks
+//------------------------------------------------------------------------------
+
+function fileLoadSelected()
+{
+    const iElem = document.getElementById('uploadInputElem');
+    const file = iElem.files[0];
+
+    var reader = new FileReader();
+    reader.readAsText(file,'UTF-8');
+    
+    reader.onload = readerEvent => {
+        var fileContent = readerEvent.target.result;
+        try
+        {            
+            updateAppData(JSON.parse(fileContent));
+        }
+        catch (err){
+            console.err("Unable to read file - is it valid JSON?")
+        }
+    }
+}
+
+//------------------------------------------------------------------------------
+
+function loadBtnClicked()
+{ 
+    const iElem = document.getElementById('uploadInputElem');
+    iElem.click();
+}
+
+//------------------------------------------------------------------------------
+
+function saveBtnClicked()
+{    
+    const storageObj = { "resps" : gResps, "team" : gTeam };
+
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(storageObj));
+    const dlAnchorElem = document.getElementById('downloadAnchorElem');
+    dlAnchorElem.setAttribute("href",     dataStr     );
+    dlAnchorElem.setAttribute("download", "wdw.json");
+    dlAnchorElem.click();
+}
+
 //------------------------------------------------------------------------------
 
 function respDialogXClicked()
