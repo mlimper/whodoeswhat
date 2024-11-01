@@ -61,6 +61,19 @@ class TeamMember
 }
 
 //------------------------------------------------------------------------------
+
+class NumberAnimation
+{
+    constructor(elem, srcVal, tgtVal)
+    {
+        this.elem   = elem;
+        this.srcVal = srcVal;
+        this.tgtVal = tgtVal;
+        this.curVal = srcVal;
+    }
+}
+
+//------------------------------------------------------------------------------
 // GLOBAL VARIABLES
 //------------------------------------------------------------------------------
 
@@ -77,6 +90,18 @@ let gResps = [];
 //------------------------------------------------------------------------------
 
 let gTeam = [];
+
+//------------------------------------------------------------------------------
+
+let gPercAnimations = [];
+
+//------------------------------------------------------------------------------
+
+let gAnimLast = new Date();
+
+//------------------------------------------------------------------------------
+
+const animPercPerMS = 0.05; // from 0% to 100% = 2s duration
 
 //------------------------------------------------------------------------------
 
@@ -167,6 +192,66 @@ function updateAppDataFromLocalStorage()
 
 //------------------------------------------------------------------------------
 // ui utilities
+//------------------------------------------------------------------------------
+
+function animLoop()
+{
+    let needsUpdate = false;
+
+    const animNow = new Date();
+    const elapsed = animNow - gAnimLast;
+    gAnimLast = animNow;
+
+    const percElapsed = elapsed * animPercPerMS;
+
+    for (let pa of gPercAnimations)
+    {
+        if (pa.curVal == pa.tgtVal)
+            continue;
+
+        if (pa.tgtVal > pa.srcVal)
+        {
+            pa.curVal += percElapsed;
+            pa.curVal = Math.min(pa.curVal, pa.tgtVal);
+        }
+        else
+        {
+            pa.curVal -= percElapsed;
+            pa.curVal = Math.max(pa.curVal, pa.tgtVal);
+        }
+
+        const percDispTxt = +(pa.curVal).toFixed(0) + "%";
+        pa.elem.innerText = percDispTxt;
+
+        if (pa.curVal != pa.tgtVal)
+            needsUpdate = true;
+    }
+
+    if (needsUpdate)
+    {
+        requestAnimationFrame(animLoop);
+    }    
+    else
+    {
+        gPercAnimations = [];
+    }
+}
+
+//------------------------------------------------------------------------------
+
+function schedulePercAnimation(elem, srcPerc, tgtPerc)
+{
+    gPercAnimations.push(new NumberAnimation(elem, srcPerc, tgtPerc));
+
+    // first animation? -> start animation loop
+    if (gPercAnimations.length == 1)
+    {   
+        gAnimLast = new Date();
+
+        requestAnimationFrame(animLoop);
+    }
+}
+
 //------------------------------------------------------------------------------
 
 function toggleDialog(elemID, toggleState)
@@ -404,7 +489,7 @@ function respXClicked(respIDHTML)
     const rIDNum = Number(respIDHTML.substring(1));
     const r      = findResp(rIDNum);
 
-    launchConfirmationDialog("Delete responsibility \"" + r.title + "\"?",
+    launchConfirmationDialog("Delete objective \"" + r.title + "\"?",
                              (choice) => {
                                 // perform deletion
                                 if (choice)
@@ -602,6 +687,7 @@ function createOrUpdateTeamMember(id, tData)
 
 function updateWorkloadScore(teamMember)
 {
+    // update workload score bar
     let hours = 0;
 
     for (const rID of teamMember.respIDs)
@@ -610,13 +696,37 @@ function updateWorkloadScore(teamMember)
         hours += r.weeklyHours;
     }
 
-    const hoursPerc        = +(100 * (hours / teamMember.weeklyHourBudget)).toFixed(2);
+    const hoursPerc        = +(100 * (hours / teamMember.weeklyHourBudget)).toFixed(0);
     const scoreBarStyleStr = `linear-gradient(90deg,rgb(102, 117, 111) ${hoursPerc}%, black ${hoursPerc}%)`;
 
     const tElem = document.getElementById("t" + teamMember.id);
 
     tElem.querySelector(".scoreBarLabel").innerText   = hoursPerc;
     tElem.querySelector(".scoreBar").style.background = scoreBarStyleStr;
+    
+    // update responsibilities percentage display
+    for (const rID of teamMember.respIDs)
+    {
+        const r     = findResp(rID);
+        const rElem = tElem.querySelector("#r" + rID);
+        
+        // first time?
+        if (!rElem.querySelector(".draggableRespSubtitle").innerText.endsWith("%"))
+        {
+            const perc  = +(100 * (r.weeklyHours / hours)).toFixed(0) + "%";
+            rElem.querySelector(".draggableRespSubtitle").innerText = perc;
+        }   
+        // update -> animate this one  
+        else
+        {
+            const displayElem = rElem.querySelector(".draggableRespSubtitle");
+            const dElemTxt    = displayElem.innerText;
+
+            schedulePercAnimation(displayElem,
+                                  Number(dElemTxt.substring(0, dElemTxt.length - 1)),
+                                  100 * (r.weeklyHours / hours));
+        }   
+    }        
 }
 
 //------------------------------------------------------------------------------

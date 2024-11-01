@@ -23,7 +23,7 @@ html
 
     --content-col-0: rgb(3, 67, 67);
     --content-col-0-var: rgb(2, 84, 63);
-    --content-col-0-dk: rgb(12, 54, 77);
+    --content-col-0-dk: rgb(8 66 71);
     --content-col-0-lt: rgb(9, 121, 111);
     --content-col-0-txt:rgb(187, 238, 238);
 
@@ -205,7 +205,7 @@ h2
 
 .draggableResp
 {    
-    justify-self: center;    
+    justify-self: center;        
     width: var(--draggable-Resp-size);
     height: var(--draggable-Resp-size);                
     text-align: center;
@@ -258,14 +258,22 @@ h2
 
 .draggableRespTitle
 {
-    margin-top: 0.7rem;
-    height: 4.5rem;
+    margin-top: 0.1rem;
+    height: 4rem;
     font-weight: bold;
+    font-size: 95%;
+    padding: 0.4rem;
 }
 
 .draggableRespSubtitle
 {
-    display: none; /* disabled for now */    
+    /*display: none;*/
+    border: 0.05rem solid var(--content-col-0);
+    display: inline;
+    padding: 0.2rem;
+    border-radius: var(--primary-border-radius);
+    color: var(--content-col-0-txt);
+    background: linear-gradient(var(--content-col-0-lt), var(--content-col-0-var));
 }
 
 button
