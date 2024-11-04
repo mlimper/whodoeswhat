@@ -450,12 +450,41 @@ function createRespBtnClicked()
     createOrUpdateResponsibility(gRespsIDCounter);
     ++gRespsIDCounter;
     toggleDialog("createRespDialog", false);
+    updateLocalStorage();
+}
+
+//------------------------------------------------------------------------------
+
+function updateObjectiveBtnClicked(id)
+{
+    createOrUpdateResponsibility(id);
+    toggleDialog("createRespDialog", false);
+    updateLocalStorage();
 }
 
 //------------------------------------------------------------------------------
 
 function newRespBtnClicked()
 {
+    const dialogElem = document.querySelector("#createRespDialog");
+    dialogElem.querySelector(".dialogHeaderBarText").innerText = "New Objective";
+
+    document.querySelector("#createObjectiveBtn").style.display = "inline";
+    document.querySelector("#updateObjectiveBtn").style.display = "none";
+
+    toggleDialog("createRespDialog", true);
+}
+
+//------------------------------------------------------------------------------
+
+function objectiveDblClicked()
+{
+    const dialogElem = document.querySelector("#createRespDialog");
+    dialogElem.querySelector(".dialogHeaderBarText").innerText = "View / Modify Objective";
+    
+    document.querySelector("#createObjectiveBtn").style.display = "none";
+    document.querySelector("#updateObjectiveBtn").style.display = "inline";
+
     toggleDialog("createRespDialog", true);
 }
 
@@ -473,6 +502,7 @@ function createTeamMemberBtnClicked()
     createOrUpdateTeamMember(gTeamIDCounter);
     ++gTeamIDCounter;
     toggleDialog("createTeamMemberDialog", false);
+    updateLocalStorage();
 }
 
 //------------------------------------------------------------------------------
@@ -582,7 +612,7 @@ function createOrUpdateResponsibility(id, rData)
 
     const newRespHTML = 
     [
-        "div", { "class" : "draggableResp", draggable: "true", id : htmlID}, "",
+        "div", { "class" : "draggableResp", draggable: "true", id : htmlID, "ondblclick" : "objectiveDblClicked(" + id +")"}, "",
         [
             ["div", {"class" : "draggableRespX", "onclick" : `respXClicked('${htmlID}')`}, "X", []],
             ["div", {"class" : "draggableRespTitle"},    r.title,                    []],
@@ -590,17 +620,16 @@ function createOrUpdateResponsibility(id, rData)
         ]
     ];
 
-    const newHTMLElem = addToDOM(newRespHTML, document.querySelector("#respCreationArea"));
+    //TODO: add functionality to store data from dialog into data model
+    //TODO: add functionality update dialog from data model whenever it is brought up
 
-    newHTMLElem.ondragstart = (e) =>
-    {
-        e.dataTransfer.setData("text", e.target.id);
-        e.dataTransfer.effectAllowed = "move";        
-    };
+    let whereToAdd = null;
     
     // responsibility doesn't exist yet -> create new one
     if (!elem)
     {   
+        whereToAdd = document.querySelector("#respCreationArea");
+
         // new element just created
         if (!rData)
         {
@@ -611,8 +640,19 @@ function createOrUpdateResponsibility(id, rData)
     // responsibility exists -> update element
     else
     {
-        //...
+        const oldElem = document.querySelector(htmlID);
+        whereToAdd = oldElem.parentElement;
+
+        oldElem.remove();
     }
+
+    const newHTMLElem = addToDOM(newRespHTML, whereToAdd);
+    
+    newHTMLElem.ondragstart = (e) =>
+    {
+        e.dataTransfer.setData("text", e.target.id);
+        e.dataTransfer.effectAllowed = "move";        
+    };
 }
 
 //------------------------------------------------------------------------------

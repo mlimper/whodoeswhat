@@ -3,6 +3,7 @@ html
     --primary-border-radius: 0.5rem;
     
     --creation-panel-background: #222;
+    --creation-panel-background-dk: #111;
     --team-canvas-background: #2e2e2e;
     --team-canvas-background-flashing: #444;
     --team-canvas-pattern-color: #222;
@@ -91,7 +92,7 @@ html, body
     position: fixed;
     text-align: center;
     width: 20rem;
-    height:  12rem;
+    height:  auto;
     left: calc(50% - 10rem);
     top: 16rem;
     z-index: 1;
@@ -99,11 +100,6 @@ html, body
     border: var(--creation-panel-line-width) solid var(--creation-panel-line-color);  
     background: var(--creation-panel-background);
     border-radius: var(--primary-border-radius);
-}
-
-#createTeamMemberDialog
-{
-    height: 14.5rem;
 }
 
 .dialogInput
@@ -115,6 +111,21 @@ html, body
 {
     margin: 1em;
     text-align: center;
+}
+
+.dialogInputLine > textarea,
+.dialogInputLine > input
+{
+    color: white;
+    background-color: var(--creation-panel-background-dk);
+}
+
+.dialogInputLine > textarea
+{
+    width: 15rem;
+    resize: vertical;
+    max-height: 5rem;
+    margin: 0.25rem 0;
 }
 
 .dialogHeaderBar
@@ -143,6 +154,11 @@ html, body
     padding: 0.2rem;
 }
 
+#updateObjectiveBtn
+{
+    display: none;
+}
+
 h1
 {    
     font-size: x-large;
@@ -153,11 +169,16 @@ h1
     background-color: #111;    
 }
 
-h2
+h2, h3
 {
     color: #666;
     font-size: large;
     margin: 0 0 0.5rem;
+}
+
+h3
+{
+    font-size: medium;
 }
 
 .toolPanelSection, #respCreationArea

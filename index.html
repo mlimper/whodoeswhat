@@ -16,18 +16,30 @@
         
         <!-- DIALOG: NEW RESPONSIBILITY -->
         <div id="createRespDialog" class="dialog">  
-            <div class="dialogHeaderBar">New Objective
+            <div class="dialogHeaderBar"><span class="dialogHeaderBarText">New Objective</span>
                 <button class="dialogButtonX" onclick="respDialogXClicked()">X</button>
             </div>
             <div class="dialogInput">                
                 <div class="dialogInputLine">
                     <input id="respNameInput"   type="text"   value="Title"></input>
                 </div>
-                <div class="dialogInputLine">
-                    <input id="respHoursInput" type="number" value="8"></input><br>
-                    <label for="respHoursInput">h / week</label>
+
+                <h3>Detailed Responsibilities</h3>
+                <div class="dialogInputLine">                    
+                    <textarea id="objectiveRespInput1" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput2" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput3" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput4" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput5" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput6" rows="2" value=""></textarea><br>
                 </div>
-                <button class="dialogBtn" onclick="createRespBtnClicked()">Create</button>
+
+                <h3>Allocated Hours / Week</h3>
+                <div class="dialogInputLine">
+                    <input id="respHoursInput" type="number" value="8"></input><br>                    
+                </div>
+                <button class="dialogBtn" id="createObjectiveBtn" onclick="createRespBtnClicked()">Create</button>
+                <button class="dialogBtn" id="updateObjectiveBtn" onclick="updateObjectiveBtnClicked()">Save</button>
             </div>                        
         </div>
 
