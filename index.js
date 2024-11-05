@@ -33,13 +33,14 @@ const gSchemaVersion = "0.1-dev";
 
 class Responsibility
 {
-    constructor(id, title, description, weeklyHours)
+    constructor(id, title, description, weeklyHours, details)
     {
       this.id          = id;
       this.title       = title;
       this.description = description;
       this.weeklyHours = weeklyHours;
       this.teamMemberID  = -1;
+      this.details       = details;
     }
 }
 
@@ -105,6 +106,10 @@ const animPercPerMS = 0.05; // from 0% to 100% = 2s duration
 
 //------------------------------------------------------------------------------
 
+let gEditingObjectiveID = -1;
+
+//------------------------------------------------------------------------------
+
 let gConfirmDialogCallback = (choice) => { toggleDialog("confirmDialog", false); };
 
 //------------------------------------------------------------------------------
@@ -128,7 +133,7 @@ function findMaxID(objArr)
 }
 //------------------------------------------------------------------------------
 
-function findResp(id)
+function findObjective(id)
 {
     for (const r of gResps)
     {
@@ -380,7 +385,7 @@ function initDropCallbacks(z)
 
         // find and transfer responsibility
         const respID = Number(respElem.id.substring(1));
-        const r      = findResp(respID);
+        const r      = findObjective(respID);
         
         const teamMemberID = Number(e.target.parentElement.id.substring(1));
         const t = findTeamMember(teamMemberID);
@@ -455,10 +460,18 @@ function createRespBtnClicked()
 
 //------------------------------------------------------------------------------
 
-function updateObjectiveBtnClicked(id)
+function updateObjectiveBtnClicked()
 {
-    createOrUpdateResponsibility(id);
+    const ob = findObjective(gEditingObjectiveID);
+
+    createOrUpdateResponsibility(gEditingObjectiveID, ob);
     toggleDialog("createRespDialog", false);
+
+    if (ob.teamMemberID != -1)
+    {
+        updateWorkloadScore(findTeamMember(ob.teamMemberID));
+    }    
+
     updateLocalStorage();
 }
 
@@ -477,15 +490,28 @@ function newRespBtnClicked()
 
 //------------------------------------------------------------------------------
 
-function objectiveDblClicked()
+function objectiveDblClicked(id)
 {
     const dialogElem = document.querySelector("#createRespDialog");
     dialogElem.querySelector(".dialogHeaderBarText").innerText = "View / Modify Objective";
     
-    document.querySelector("#createObjectiveBtn").style.display = "none";
-    document.querySelector("#updateObjectiveBtn").style.display = "inline";
+    dialogElem.querySelector("#createObjectiveBtn").style.display = "none";
+    dialogElem.querySelector("#updateObjectiveBtn").style.display = "inline";
 
-    toggleDialog("createRespDialog", true);
+    // update dialog from data model of selected objective
+    const ob = findObjective(id);
+    let idx  = 1;
+    for (const d of ob.details)
+    {
+        dialogElem.querySelector("#objectiveRespInput" + idx).value = d;
+        ++idx;
+    }    
+    document.querySelector("#respNameInput").value  = ob.title;    
+    document.querySelector("#respHoursInput").value = ob.weeklyHours;
+
+    gEditingObjectiveID = id;
+
+    toggleDialog("createRespDialog", true);    
 }
 
 //------------------------------------------------------------------------------
@@ -514,10 +540,9 @@ function newTeamMemberBtnClicked()
 
 //------------------------------------------------------------------------------
 
-function respXClicked(respIDHTML)
-{
-    const rIDNum = Number(respIDHTML.substring(1));
-    const r      = findResp(rIDNum);
+function respXClicked(id)
+{ 
+    const r = findObjective(id);
 
     launchConfirmationDialog("Delete objective \"" + r.title + "\"?",
                              (choice) => {
@@ -527,13 +552,13 @@ function respXClicked(respIDHTML)
                                     if (r.teamMemberID != -1)
                                     {
                                         const t   = findTeamMember(r.teamMemberID);
-                                        t.respIDs = t.respIDs.filter(e => e !== rIDNum);
+                                        t.respIDs = t.respIDs.filter(e => e !== id);
                                         updateWorkloadScore(t);
                                     }
 
-                                    document.getElementById(respIDHTML).remove();
+                                    document.getElementById("r" + id).remove();
                                     
-                                    gResps = gResps.filter(resp => resp.id !== rIDNum);
+                                    gResps = gResps.filter(resp => resp.id !== id);
 
                                     updateLocalStorage();
                                 }
@@ -555,7 +580,7 @@ function teamMemberXClicked(teamMemberIDHTML)
                                     // un-assign responsibilities (=> to backlog)
                                     for (const rID of t.respIDs)
                                     {
-                                        const r = findResp(rID);
+                                        const r = findObjective(rID);
                                         r.teamMemberID = -1;
 
                                         const rElem = document.getElementById("r" + rID);
@@ -597,32 +622,29 @@ function init()
 
 function createOrUpdateResponsibility(id, rData)
 {
-    const htmlID = "r" + id;
-    let elem = document.querySelector(htmlID);
+    const uiName  = document.querySelector("#respNameInput").value;
+    const uiHours = Number(document.querySelector("#respHoursInput").value);
+    let uiDetails = [];
+    for (let idx = 1; idx <= 6; ++idx)
+    {
+        uiDetails.push(document.querySelector("#objectiveRespInput" + idx).value);
+    }
 
-    const r = (rData ? rData : new Responsibility(gRespsIDCounter,
-                                                  document.querySelector("#respNameInput").value,
-                                                  "",
-                                                  Number(document.querySelector("#respHoursInput").value)));
+    const r = ( rData ? rData : new Responsibility(gRespsIDCounter,
+                                                   uiName,
+                                                   "",
+                                                   uiHours,
+                                                   uiDetails) );
 
     // TODO: sanitizing steps should not be necessary once schema is stable
     r.weeklyHours = Number(r.weeklyHours);
-    if (isNaN(r.weeklyHours)) { r.weeklyHours = 8};
+    if (isNaN(r.weeklyHours)) { r.weeklyHours = 8; };
+    if (!r.details) { r.details = ["","","","","",""]; };
     //
 
-    const newRespHTML = 
-    [
-        "div", { "class" : "draggableResp", draggable: "true", id : htmlID, "ondblclick" : "objectiveDblClicked(" + id +")"}, "",
-        [
-            ["div", {"class" : "draggableRespX", "onclick" : `respXClicked('${htmlID}')`}, "X", []],
-            ["div", {"class" : "draggableRespTitle"},    r.title,                    []],
-            ["div", {"class" : "draggableRespSubtitle"}, r.weeklyHours + "h / week", []]
-        ]
-    ];
-
-    //TODO: add functionality to store data from dialog into data model
-    //TODO: add functionality update dialog from data model whenever it is brought up
-
+    const htmlID = "r" + id;
+    const elem = document.getElementById(htmlID);
+    
     let whereToAdd = null;
     
     // responsibility doesn't exist yet -> create new one
@@ -630,21 +652,37 @@ function createOrUpdateResponsibility(id, rData)
     {   
         whereToAdd = document.querySelector("#respCreationArea");
 
-        // new element just created
+        //TODO: this part doesn't really belong here
+        // new element just created, or loading existing data?
         if (!rData)
         {
             gResps.push(r);
         }
-    }
-    // TODO: MAKE EDITABLE LATER (CURRENTLY WE CAN ONLY RE-CREATE ITEMS)
-    // responsibility exists -> update element
+    }    
+    // responsibility exists -> update & remove outdated element
     else
     {
-        const oldElem = document.querySelector(htmlID);
+        //TODO: a bit ugly, the element moves right now (inside lists)
+        const oldElem = document.getElementById(htmlID);
         whereToAdd = oldElem.parentElement;
 
         oldElem.remove();
+
+        r.title       = uiName;
+        r.weeklyHours = uiHours;
+        r.details     = uiDetails;
     }
+
+    // add new or updated element to DOM
+    const newRespHTML = 
+    [
+        "div", { "class" : "draggableResp", draggable: "true", id : htmlID, "ondblclick" : "objectiveDblClicked(" + id +")"}, "",
+        [
+            ["div", {"class" : "draggableRespX", "onclick" : `respXClicked('${id}')`}, "X", []],
+            ["div", {"class" : "draggableRespTitle"},    r.title,                    []],
+            ["div", {"class" : "draggableRespSubtitle"}, r.weeklyHours + "h / week", []]
+        ]
+    ];
 
     const newHTMLElem = addToDOM(newRespHTML, whereToAdd);
     
@@ -732,7 +770,7 @@ function updateWorkloadScore(teamMember)
 
     for (const rID of teamMember.respIDs)
     {
-        const r = findResp(rID);
+        const r = findObjective(rID);
         hours += r.weeklyHours;
     }
 
@@ -747,7 +785,7 @@ function updateWorkloadScore(teamMember)
     // update responsibilities percentage display
     for (const rID of teamMember.respIDs)
     {
-        const r     = findResp(rID);
+        const r     = findObjective(rID);
         const rElem = tElem.querySelector("#r" + rID);
         
         // first time?
