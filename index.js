@@ -457,17 +457,15 @@ function createObjectiveBtnClicked()
     {
         uiDetails.push(document.querySelector("#objectiveRespInput" + idx).value);
     }
-    ob.details = uiDetails;
-
     const ob = new Objective(gObjectivesIDCounter,
                              document.querySelector("#respNameInput").value,
                              Number(document.querySelector("#respHoursInput").value),
-                             uiDetails);
-    gObjectives.push(r);
+                             uiDetails);    
+    gObjectives.push(ob);
     ++gObjectivesIDCounter;
 
     // create UI
-    createObjectiveUI(r);
+    createObjectiveUI(ob);
     
     // update data in local storage
     updateLocalStorage();
