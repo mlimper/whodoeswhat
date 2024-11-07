@@ -586,23 +586,23 @@ function newTeamMemberBtnClicked()
 
 function respXClicked(id)
 { 
-    const r = findObjective(id);
+    const ob = findObjective(id);
 
-    launchConfirmationDialog("Delete objective \"" + r.title + "\"?",
+    launchConfirmationDialog("Delete objective \"" + ob.title + "\"?",
                              (choice) => {
                                 // perform deletion
                                 if (choice)
                                 {
-                                    if (r.teamMemberID != -1)
+                                    if (ob.teamMemberID != -1)
                                     {
-                                        const t   = findTeamMember(r.teamMemberID);
-                                        t.objectiveIDs = t.objectiveIDs.filter(e => e !== id);
-                                        updateWorkloadScore(t);
+                                        const tm = findTeamMember(ob.teamMemberID);
+                                        tm.objectiveIDs = tm.objectiveIDs.filter(e => e !== id);
+                                        updateWorkloadScore(tm);
                                     }
 
                                     document.getElementById("o" + id).remove();
                                     
-                                    gObjectives = gObjectives.filter(resp => resp.id !== id);
+                                    gObjectives = gObjectives.filter(o => o.id !== id);
 
                                     updateLocalStorage();
                                 }
@@ -611,10 +611,9 @@ function respXClicked(id)
 
 //------------------------------------------------------------------------------
 
-function teamMemberXClicked(teamMemberIDHTML)
+function teamMemberXClicked(id)
 {
-    const tIDNum = Number(teamMemberIDHTML.substring(1));
-    const t      = findTeamMember(tIDNum);
+    const t = findTeamMember(id);
 
     launchConfirmationDialog("Delete team member \"" + t.name + "\"?",
                              (choice) => {
@@ -633,11 +632,72 @@ function teamMemberXClicked(teamMemberIDHTML)
 
                                     document.getElementById(teamMemberIDHTML).remove();
                                     
-                                    gTeam = gTeam.filter(tm => tm.id !== tIDNum);
+                                    gTeam = gTeam.filter(tm => tm.id !== id);
 
                                     updateLocalStorage();
                                 }
                              });
+}
+
+//------------------------------------------------------------------------------
+
+function copyTMToClipboard(id)
+{
+    const t = findTeamMember(id);
+
+    let clipBoardStrHTML = "";
+    let clipBoardStrTxt  = "";
+
+    const writeObjective = (obID) => {
+        let strHTML = "";
+        let strTxt  = "";
+
+        const ob = findObjective(obID);
+
+        strHTML += `<h2>${ob.title}</h2>`;
+        strTxt  += `## ${ob.title}\n`;
+        strHTML += `<i>${ob.weeklyHours} h / week (average)</i>`;
+        strTxt  += `*${ob.weeklyHours} h / week (average)*`;
+
+        strHTML += "<ul>";
+        strTxt  += "\n";
+        for (const d of ob.details)
+        {
+            if (d != "")
+            {
+                strHTML += `<li>${d}</li>`;   
+                strTxt  += `* ${d}\n`;
+            }            
+        }
+        strHTML += "</ul>";        
+        strHTML += "<br>";
+        strTxt  += "\n";
+
+        return [strHTML, strTxt];
+    };
+
+    clipBoardStrHTML += `<h1>Goals for ${t.name}<br>(${t.title})</h1>`;
+    clipBoardStrTxt  += `# Goals for ${t.name} (${t.title})\n`;
+
+    for (const obID of t.objectiveIDs)
+    {
+        const strings = writeObjective(obID);
+
+        clipBoardStrHTML += strings[0];
+        clipBoardStrTxt  += strings[1];
+    }
+
+    const blobHtml = new Blob([clipBoardStrHTML], { type: "text/html"  });
+    const blobText = new Blob([clipBoardStrTxt],  { type: "text/plain" });
+    const data = [new ClipboardItem({      
+        ["text/html"]:  blobHtml,
+        ["text/plain"]: blobText,
+    })];
+
+    navigator.clipboard.write(data).then(
+        () => {alert('Copied to clipboard!')},
+        () => {}
+    );
 }
 
 //------------------------------------------------------------------------------
@@ -689,9 +749,9 @@ function createObjectiveUI(ob)
     [
         "div", { class : "draggableResp", draggable : "true", id : "o" + ob.id, ondblclick : "objectiveDblClicked(" + ob.id +")"}, "",
         [
-            ["div", {"class" : "draggableRespX", "onclick" : `respXClicked('${ob.id}')`}, "X", []],
-            ["div", {"class" : "draggableRespTitle"},    ob.title,                    []],
-            ["div", {"class" : "draggableRespSubtitle"}, ob.weeklyHours + "h / week", []]
+            ["button", {"class" : "draggableRespX", "onclick" : `respXClicked('${ob.id}')`}, "X", []],
+            ["div",    {"class" : "draggableRespTitle"},    ob.title,                    []],
+            ["div",    {"class" : "draggableRespSubtitle"}, ob.weeklyHours + "h / week", []]
         ]
     ];
     const newHTMLElem = addToDOM(newRespHTML, document.querySelector("#respCreationArea"));    
@@ -714,18 +774,26 @@ function createTeamMemberUI(tm)
     [
         "div", { "class" : "respHolder", id : htmlID}, "",
         [
-            ["div", {"class" : "respHolderX", "onclick" : `teamMemberXClicked('${htmlID}')`}, "X", []],
+            ["div", {"class" : "tmTopBar"}, "", [
+                ["button", {"class" : "tmClipboardBtn", "onclick" : `copyTMToClipboard(${tm.id})`}, "",  [
+                    ["div", {"class" : "tmClipboardBtnIcon"}, "", []]
+                ]],
+                ["button", {"class" : "respHolderX",    "onclick" : `teamMemberXClicked(${tm.id})`}, "", [
+                    ["div", {"class" : "tmXBtnIcon"}, "X", []]
+                ]]
+            ]],
             ["div", {"class" : "respHolderTitle"},    tm.name,  []],
             ["div", {"class" : "respHolderSubtitle"}, tm.title, []],
             ["div", {"class" : "respHolderDropArea dropTarget"}, "",   []],
             //constructScoreBarTree("Focus:"),
             constructScoreBarTree("Assigned:", htmlID + "WorkloadBar")
         ]
-    ];        
+    ];
     const newHTMLElem  = addToDOM(newTeamMember, document.querySelector("#teamCanvas"));
     const dropAreaElem = newHTMLElem.querySelector(".respHolderDropArea");
 
-          
+    const svgSrc = "<svg clip-rule='evenodd' fill-rule='evenodd' stroke-linejoin='round' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' stroke-miterlimit='2'><path d='m6 19v2c0 .621.52 1 1 1h2v-1.5h-1.5v-1.5zm7.5 3h-3.5v-1.5h3.5zm4.5 0h-3.5v-1.5h3.5zm4-3h-1.5v1.5h-1.5v1.5h2c.478 0 1-.379 1-1zm-1.5-1v-3.363h1.5v3.363zm0-4.363v-3.637h1.5v3.637zm-13-3.637v3.637h-1.5v-3.637zm11.5-4v1.5h1.5v1.5h1.5v-2c0-.478-.379-1-1-1zm-10 0h-2c-.62 0-1 .519-1 1v2h1.5v-1.5h1.5zm4.5 1.5h-3.5v-1.5h3.5zm3-1.5v-2.5h-13v13h2.5v-1.863h1.5v3.363h-4.5c-.48 0-1-.379-1-1v-14c0-.481.38-1 1-1h14c.621 0 1 .522 1 1v4.5h-3.5v-1.5z' fill-rule='nonzero' fill='white'></path></svg></div>"  
+
     // init responsibilities, if any
     for (const rID of tm.objectiveIDs)
     {

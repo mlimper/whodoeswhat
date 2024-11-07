@@ -241,40 +241,58 @@ h3
     background: linear-gradient(var(--content-col-0-lt), var(--content-col-0-var));
 }
 
-.draggableRespX, .respHolderX
+.draggableRespX, .respHolderX, .tmClipboardBtn
 {   
-    height: 0.5rem;
-    width: 0.5rem;
+    margin: 0;
     padding: 0.2rem;
-    font-size: 0.5rem;    
-    border-radius: var(--primary-border-radius);
+    font-size: 0.5rem;
+}
+
+.respHolderX, .tmClipboardBtn
+{
+    height: 1.4rem;    
+    min-width: 1.4rem;
+    padding: 0.3rem;
+    border-radius: 0.7rem;    
+    margin-left: calc(2 * var(--draggable-Resp-size) - 0.5rem);
 }
 
 .draggableRespX
 {
-    margin: 0.15rem;
-    margin-left: calc(var(--draggable-Resp-size) - 1rem);
+    height: 1rem;
+    min-width: 1rem;
+    margin-left: calc(var(--draggable-Resp-size) - 1.1rem);
+    margin-top: 0.1rem;
     color: var(--content-col-0-txt);
     background: var(--content-col-0);  
+    border-radius: 0.5rem;
 }
 
 .respHolderX
-{    
-    margin: 0;
-    margin-left: calc(2 * var(--draggable-Resp-size) + 1.8rem);
-    background-color: var(--team-canvas-background);
+{       
+    margin-left: 0.2rem;
+    vertical-align: bottom;  
+}
+
+.tmClipboardBtnIcon, .tmXBtnIcon
+{
+    width: 0.8rem;
+    height: 0.8rem; 
+}
+
+.tmXBtnIcon
+{
+    font-size: 0.7rem;
+}
+
+.tmClipboardBtnIcon
+{
+    background: url("data:image/svg+xml;utf8,<svg clip-rule='evenodd' fill-rule='evenodd' stroke-linejoin='round' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' stroke-miterlimit='2'><path d='m6 19v2c0 .621.52 1 1 1h2v-1.5h-1.5v-1.5zm7.5 3h-3.5v-1.5h3.5zm4.5 0h-3.5v-1.5h3.5zm4-3h-1.5v1.5h-1.5v1.5h2c.478 0 1-.379 1-1zm-1.5-1v-3.363h1.5v3.363zm0-4.363v-3.637h1.5v3.637zm-13-3.637v3.637h-1.5v-3.637zm11.5-4v1.5h1.5v1.5h1.5v-2c0-.478-.379-1-1-1zm-10 0h-2c-.62 0-1 .519-1 1v2h1.5v-1.5h1.5zm4.5 1.5h-3.5v-1.5h3.5zm3-1.5v-2.5h-13v13h2.5v-1.863h1.5v3.363h-4.5c-.48 0-1-.379-1-1v-14c0-.481.38-1 1-1h14c.621 0 1 .522 1 1v4.5h-3.5v-1.5z' fill-rule='nonzero' fill='white'></path></svg>");
 }
 
 .draggableRespX:hover
 {    
-    cursor: pointer;
     background: var(--content-col-0-var);
-}
-
-.respHolderX:hover
-{    
-    cursor: pointer;
-    background: var(--creation-panel-line-color);
 }
 
 .draggableRespTitle
