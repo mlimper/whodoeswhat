@@ -429,7 +429,8 @@ function fileLoadSelected()
         {            
             const data = JSON.parse(fileContent);
 
-            updateAppData(data);
+            updateAppData(data);            
+            updateLocalStorage();
 
             clearUIContent();
             createUIContent();
