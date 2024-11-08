@@ -21,25 +21,25 @@
             </div>
             <div class="dialogInput">                
                 <div class="dialogInputLine">
-                    <input id="respNameInput"   type="text"   value="Title"></input>
+                    <input id="respNameInput" class="disableInViewMode" type="text" value="Title"></input>
                 </div>
 
                 <h3>Detailed Responsibilities</h3>
                 <div class="dialogInputLine">                    
-                    <textarea id="objectiveRespInput1" rows="2" value=""></textarea><br>
-                    <textarea id="objectiveRespInput2" rows="2" value=""></textarea><br>
-                    <textarea id="objectiveRespInput3" rows="2" value=""></textarea><br>
-                    <textarea id="objectiveRespInput4" rows="2" value=""></textarea><br>
-                    <textarea id="objectiveRespInput5" rows="2" value=""></textarea><br>
-                    <textarea id="objectiveRespInput6" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput1" class="disableInViewMode" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput2" class="disableInViewMode" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput3" class="disableInViewMode" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput4" class="disableInViewMode" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput5" class="disableInViewMode" rows="2" value=""></textarea><br>
+                    <textarea id="objectiveRespInput6" class="disableInViewMode" rows="2" value=""></textarea><br>
                 </div>
 
-                <h3>Allocated Hours / Week</h3>
-                <div class="dialogInputLine">
+                <h3 class="editableOnly">Allocated Hours / Week</h3>
+                <div class="dialogInputLine editableOnly">
                     <input id="respHoursInput" type="number" value="8"></input><br>                    
                 </div>
-                <button class="dialogBtn" id="createObjectiveBtn" onclick="createObjectiveBtnClicked()">Create</button>
-                <button class="dialogBtn" id="updateObjectiveBtn" onclick="updateObjectiveBtnClicked()">Save</button>
+                <button class="dialogBtn"              id="createObjectiveBtn" onclick="createObjectiveBtnClicked()">Create</button>
+                <button class="dialogBtn editableOnly" id="updateObjectiveBtn" onclick="updateObjectiveBtnClicked()">Save</button>
             </div>                        
         </div>
 

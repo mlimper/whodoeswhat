@@ -1,29 +1,6 @@
-//TODO:
-// DELETE TEAM MEMBER BUTTON
+//TODOS:
 // EDIT BUTTON TEAM
-// EDIT BUTTON RESP
-
-//TODO: pw protected files
-/*
-    https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt
-    function getMessageEncoding() {
-    const messageBox = document.querySelector(".aes-gcm #message");
-    const message = messageBox.value;
-    const enc = new TextEncoder();
-    return enc.encode(message);
-  }
-  
-  function encryptMessage(key) {
-    const encoded = getMessageEncoding();
-    // iv will be needed for decryption
-    const iv = window.crypto.getRandomValues(new Uint8Array(12));
-    return window.crypto.subtle.encrypt(
-      { name: "AES-GCM", iv: iv },
-      key,
-      encoded,
-    );
-  }
-*/
+// pw protected files? (https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/encrypt)
 
 const gSchemaVersion = "0.1-dev";
 
@@ -109,6 +86,10 @@ let gEditingObjectiveID = -1;
 
 //------------------------------------------------------------------------------
 
+let gViewMode = false;
+
+//------------------------------------------------------------------------------
+
 let gConfirmDialogCallback = (choice) => { toggleDialog("confirmDialog", false); };
 
 //------------------------------------------------------------------------------
@@ -165,14 +146,49 @@ function findTeamMember(id)
 function updateAppData(data)
 {
     gObjectives = data.resps;
-    gTeam  = data.team;
+    gTeam       = data.team;
     
     gObjectivesIDCounter = gObjectives.length > 0 ? findMaxID(gObjectives) + 1 : 0;
-    gTeamIDCounter  = gTeam.length  > 0 ? findMaxID(gObjectives) + 1 : 0;
+    gTeamIDCounter       = gTeam.length  > 0 ? findMaxID(gObjectives) + 1 : 0;
 }
 
 //------------------------------------------------------------------------------
-// loading / saving
+// loading / saving via local storage or URL param
+//------------------------------------------------------------------------------
+
+async function loadFromURLParams()
+{
+    const queryString = window.location.search;
+    const urlParams   = new URLSearchParams(queryString);
+
+    const viewResource = urlParams.get('viewResource');
+
+    if (viewResource)
+    {
+        try
+        {
+            const response = await fetch(viewResource);            
+            if (response.ok)
+            {
+                const data = await response.json();
+                updateAppData(data);
+                return true;
+            }
+            else
+            {
+                throw new Error('Invalid response for HTTP request.');
+            }
+        }
+        catch (err)
+        {
+            console.error("ERROR: unable to load valid JSON from file \"" + viewResource + "\"");
+            return false;
+        }
+    }
+    
+    return false;
+}
+
 //------------------------------------------------------------------------------
 
 function updateLocalStorage()
@@ -382,7 +398,7 @@ function initDropCallbacks(z)
         const respElem = document.getElementById(dropData);
         e.target.appendChild(respElem);
 
-        // find and transfer responsibility
+        // find and transfer objective
         const obID = Number(respElem.id.substring(1));
         const r    = findObjective(obID);
         
@@ -411,7 +427,12 @@ function fileLoadSelected()
         var fileContent = readerEvent.target.result;
         try
         {            
-            updateAppData(JSON.parse(fileContent));
+            const data = JSON.parse(fileContent);
+
+            updateAppData(data);
+
+            clearUIContent();
+            createUIContent();
         }
         catch (err){
             console.err("Unable to read file - is it valid JSON?")
@@ -523,10 +544,20 @@ function newRespBtnClicked()
 function objectiveDblClicked(id)
 {
     const dialogElem = document.querySelector("#createRespDialog");
-    dialogElem.querySelector(".dialogHeaderBarText").innerText = "View / Modify Objective";
-    
+
+    const dialogBarTxt = (gViewMode ? "View Objective" : "View / Modify Objective");    
+
+    dialogElem.querySelector(".dialogHeaderBarText").innerText = dialogBarTxt;    
     dialogElem.querySelector("#createObjectiveBtn").style.display = "none";
     dialogElem.querySelector("#updateObjectiveBtn").style.display = "inline";
+
+    // in read-only mode, hide all elements for editing,
+    // and disable the ones that aren't supposed to be editable (but should still be shown)
+    if (gViewMode)
+    {
+        dialogElem.querySelectorAll(".editableOnly").forEach(     (elem) => { elem.style.display = "none"; });
+        dialogElem.querySelectorAll(".disableInViewMode").forEach((elem) => { elem.readOnly      = true;  });
+    }
 
     // update dialog from data model of selected objective
     const ob = findObjective(id);
@@ -613,26 +644,26 @@ function respXClicked(id)
 
 function teamMemberXClicked(id)
 {
-    const t = findTeamMember(id);
+    const tm = findTeamMember(id);
 
-    launchConfirmationDialog("Delete team member \"" + t.name + "\"?",
+    launchConfirmationDialog("Delete team member \"" + tm.name + "\"?",
                              (choice) => {
                                 // perform deletion
                                 if (choice)
                                 {
-                                    // un-assign responsibilities (=> to backlog)
-                                    for (const rID of t.objectiveIDs)
+                                    // un-assign objectives (=> to backlog)
+                                    for (const obID of tm.objectiveIDs)
                                     {
-                                        const r = findObjective(rID);
-                                        r.teamMemberID = -1;
+                                        const ob = findObjective(obID);
+                                        ob.teamMemberID = -1;
 
-                                        const rElem = document.getElementById("o" + rID);
-                                        document.getElementById("respCreationArea").appendChild(rElem);
+                                        const obElem = document.getElementById("o" + obID);
+                                        document.getElementById("respCreationArea").appendChild(obElem);
                                     }
 
-                                    document.getElementById(teamMemberIDHTML).remove();
+                                    document.getElementById("t" + id).remove();
                                     
-                                    gTeam = gTeam.filter(tm => tm.id !== id);
+                                    gTeam = gTeam.filter(t => t.id !== id);
 
                                     updateLocalStorage();
                                 }
@@ -657,7 +688,7 @@ function copyTMToClipboard(id)
         strHTML += `<h2>${ob.title}</h2>`;
         strTxt  += `## ${ob.title}\n`;
         strHTML += `<i>${ob.weeklyHours} h / week (average)</i>`;
-        strTxt  += `*${ob.weeklyHours} h / week (average)*`;
+        strTxt  += `* ${ob.weeklyHours} h / week (average)`;
 
         strHTML += "<ul>";
         strTxt  += "\n";
@@ -704,29 +735,54 @@ function copyTMToClipboard(id)
 // general
 //------------------------------------------------------------------------------
 
-function init()
+async function init()
 {
-    if (gObjectives.length == 0 && gTeam.length == 0)
+    // check URL parameters first
+    const loadedFromURL = await loadFromURLParams();    
+    if (loadedFromURL)
+    {
+        gViewMode = true;
+
+        const rElem = document.querySelector(':root');
+        rElem.style.setProperty("--creation-panel-width", "0.1rem");
+    }
+    // if loading via URL parameters not successful, init from local storage
+    else
     {
         updateAppDataFromLocalStorage();
+    }
 
-        for (const r of gObjectives)
-        {            
-            // TODO: sanitizing steps should not be necessary once schema is stable            
-            //r.weeklyHours = Number(r.weeklyHours);
-            //if (isNaN(r.weeklyHours)) { r.weeklyHours = 8; };
-            //if (!r.details) { r.details = ["","","","","",""]; };
-            //
-            createObjectiveUI(r);
-        }
+    createUIContent();
+}
 
-        for (const tm of gTeam)
-        {
-            // TODO: sanitizing steps should not be necessary once schema is stable 
-            //if (tm.respIDs) { tm.objectiveIDs = tm.respIDs; }
-            //
-            createTeamMemberUI(tm);
-        }
+//------------------------------------------------------------------------------
+
+function clearUIContent()
+{
+    document.querySelector("#respCreationArea").innerHTML = "";
+    document.querySelector("#teamCanvas").innerHTML       = "";
+}
+
+//------------------------------------------------------------------------------
+
+function createUIContent()
+{
+    for (const r of gObjectives)
+    {            
+        // TODO: sanitizing steps should not be necessary once schema is stable            
+        //r.weeklyHours = Number(r.weeklyHours);
+        //if (isNaN(r.weeklyHours)) { r.weeklyHours = 8; };
+        if (!r.details) { r.details = ["","","","","",""]; };
+        //
+        createObjectiveUI(r);
+    }
+
+    for (const tm of gTeam)
+    {
+        // TODO: sanitizing steps should not be necessary once schema is stable 
+        if (tm.respIDs) { tm.objectiveIDs = tm.respIDs; }
+        //
+        createTeamMemberUI(tm);
     }
 }
 
@@ -759,6 +815,10 @@ function createObjectiveUI(ob)
     // setup drag event listener
     newHTMLElem.ondragstart = (e) =>
     {
+        if (gViewMode)
+        {
+            return false;
+        }
         e.dataTransfer.setData("text", e.target.id);
         e.dataTransfer.effectAllowed = "move";        
     };
@@ -772,7 +832,7 @@ function createTeamMemberUI(tm)
   
     const newTeamMember = 
     [
-        "div", { "class" : "respHolder", id : htmlID}, "",
+        "div", { class : "respHolder", id : htmlID}, "",
         [
             ["div", {"class" : "tmTopBar"}, "", [
                 ["button", {"class" : "tmClipboardBtn", "onclick" : `copyTMToClipboard(${tm.id})`}, "",  [
@@ -792,19 +852,17 @@ function createTeamMemberUI(tm)
     const newHTMLElem  = addToDOM(newTeamMember, document.querySelector("#teamCanvas"));
     const dropAreaElem = newHTMLElem.querySelector(".respHolderDropArea");
 
-    const svgSrc = "<svg clip-rule='evenodd' fill-rule='evenodd' stroke-linejoin='round' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg' stroke-miterlimit='2'><path d='m6 19v2c0 .621.52 1 1 1h2v-1.5h-1.5v-1.5zm7.5 3h-3.5v-1.5h3.5zm4.5 0h-3.5v-1.5h3.5zm4-3h-1.5v1.5h-1.5v1.5h2c.478 0 1-.379 1-1zm-1.5-1v-3.363h1.5v3.363zm0-4.363v-3.637h1.5v3.637zm-13-3.637v3.637h-1.5v-3.637zm11.5-4v1.5h1.5v1.5h1.5v-2c0-.478-.379-1-1-1zm-10 0h-2c-.62 0-1 .519-1 1v2h1.5v-1.5h1.5zm4.5 1.5h-3.5v-1.5h3.5zm3-1.5v-2.5h-13v13h2.5v-1.863h1.5v3.363h-4.5c-.48 0-1-.379-1-1v-14c0-.481.38-1 1-1h14c.621 0 1 .522 1 1v4.5h-3.5v-1.5z' fill-rule='nonzero' fill='white'></path></svg></div>"  
-
-    // init responsibilities, if any
-    for (const rID of tm.objectiveIDs)
+    // init objectives, if any
+    for (const obID of tm.objectiveIDs)
     {
-        const respElem = document.getElementById("o" + rID);
-        if (respElem)
+        const obElem = document.getElementById("o" + obID);
+        if (obElem)
         {
-            dropAreaElem.appendChild(respElem);
+            dropAreaElem.appendChild(obElem);
         }
         else
         {
-            console.warn("Invalid data: cannot find responsibility with ID " + rID);
+            console.warn("Invalid data: cannot find objective with ID " + obID);
         }
     }
 
@@ -834,7 +892,7 @@ function updateWorkloadScore(teamMember)
     tElem.querySelector(".scoreBarLabel").innerText   = hoursPerc;
     tElem.querySelector(".scoreBar").style.background = scoreBarStyleStr;
     
-    // update responsibilities percentage display
+    // update objectives percentage display
     for (const rID of teamMember.objectiveIDs)
     {
         const r     = findObjective(rID);
