@@ -771,8 +771,8 @@ function createUIContent()
     for (const r of gObjectives)
     {            
         // TODO: sanitizing steps should not be necessary once schema is stable            
-        //r.weeklyHours = Number(r.weeklyHours);
-        //if (isNaN(r.weeklyHours)) { r.weeklyHours = 8; };
+        r.weeklyHours = Number(r.weeklyHours);
+        if (isNaN(r.weeklyHours)) { r.weeklyHours = 8; };
         if (!r.details) { r.details = ["","","","","",""]; };
         //
         createObjectiveUI(r);
@@ -782,6 +782,14 @@ function createUIContent()
     {
         // TODO: sanitizing steps should not be necessary once schema is stable 
         if (tm.respIDs) { tm.objectiveIDs = tm.respIDs; }
+        delete tm.respIDs;
+        tm.objectiveIDs = tm.objectiveIDs.sort().filter(function(itm, pos, ary) {
+            return !pos || itm != ary[pos - 1];
+        });
+        tm.objectiveIDs = tm.objectiveIDs.filter((obID) => {
+            const ob = findObjective(obID);
+            return (ob.teamMemberID == tm.id);
+        });
         //
         createTeamMemberUI(tm);
     }
