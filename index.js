@@ -143,10 +143,107 @@ function findTeamMember(id)
 
 //------------------------------------------------------------------------------
 
+function isNumber(val)
+{
+    return (typeof val === 'number' && isFinite(val));
+}
+
+//------------------------------------------------------------------------------
+
+function isString(val)
+{
+    return (typeof val === 'string' || val instanceof String)
+}
+
+//------------------------------------------------------------------------------
+
 function updateAppData(data)
 {
-    gObjectives = data.resps;
-    gTeam       = data.team;
+    // sanity checks / sanitization: objectives
+    const oList    = data.resps;
+    //let validOList = [];
+    //...
+    let validOList = oList;
+
+    // extra sanitization (shouldn't be necessary after this works):
+    //--
+    for (const o of oList)
+    {
+        let owner = "";
+        for (const t of data.team)
+        {
+            if (t.objectiveIDs.includes(o.id))
+            {
+                if (owner != "")
+                {
+                    console.log.warn("Found objective " + o.title + " with ID " + o.id +
+                                     " assigned to owner \"" + t.name + "\", but also to owner \"" + owner + "\".");
+                    break;
+                }
+                owner = t.name;
+            }
+        }
+    }
+    //--
+
+    // sanity checks / sanitization: team members
+    const tList    = data.team;
+    let validTList = [];
+    for (let i = 0; i < tList.length; ++i)
+    {
+        // extra sanitization (shouldn't be necessary after this works):
+        //--
+        if (isString(tList[i]["weeklyHourBudget"]))
+        {
+            tList[i]["weeklyHourBudget"] = Number.parseInt(tList[i]["weeklyHourBudget"]);
+        }
+        //--
+
+        const validID            = isNumber(tList[i]["id"]);
+        const validName          = isString(tList[i]["name"]);
+        const validTitle         = isString(tList[i]["title"]);
+        const validObjIDs        = Array.isArray(tList[i]["objectiveIDs"]);
+        const validHoursBudget   = isNumber(tList[i]["weeklyHourBudget"]);
+        const validFocusScore    = isNumber(tList[i]["focusScore"]);
+        const validWorkloadScore = isNumber(tList[i]["workloadScore"]);
+
+        if (!validID || !validName || ! validTitle || !validObjIDs || ! validHoursBudget || !validFocusScore || ! validWorkloadScore)
+        {
+            console.warn("A team member entry to be loaded with name \"" + tList[i]["name"] + "\" didn't pass validation, skipping.");
+            continue;
+        }
+        
+        validTList.push(tList[i]);
+
+        const tmName = tList[i]["name"];
+
+        let cleanOList = [];
+        for (const oID of tList[i]["objectiveIDs"])
+        {
+            if (!isNumber(oID))
+            {
+                console.warn("Team member \"" + tmName + "\" has invalid objective assigned, using a NaN ID.");
+                continue;
+            }
+
+            let found = false;
+
+            for (const o of validOList)
+                if (o.id == oID)
+                {
+                    found = true;
+                    break;
+                }
+
+            if (found)
+                cleanOList.push(oID);
+            else
+                console.warn("Team member \"" + tmName + "\" has objective with ID " + oID + ", but no such objective was found.");
+        }        
+    }
+
+    gObjectives = validOList;
+    gTeam       = validTList;
     
     gObjectivesIDCounter = gObjectives.length > 0 ? findMaxID(gObjectives) + 1 : 0;
     gTeamIDCounter       = gTeam.length  > 0 ? findMaxID(gObjectives) + 1 : 0;
@@ -616,8 +713,9 @@ function newTeamMemberBtnClicked()
 
 //------------------------------------------------------------------------------
 
-function respXClicked(id)
+function objectiveXClicked(idStr)
 { 
+    const id = Number.parseInt(idStr);
     const ob = findObjective(id);
 
     launchConfirmationDialog("Delete objective \"" + ob.title + "\"?",
@@ -814,7 +912,7 @@ function createObjectiveUI(ob)
     [
         "div", { class : "draggableResp", draggable : "true", id : "o" + ob.id, ondblclick : "objectiveDblClicked(" + ob.id +")"}, "",
         [
-            ["button", {"class" : "draggableRespX", "onclick" : `respXClicked('${ob.id}')`}, "X", []],
+            ["button", {"class" : "draggableRespX", "onclick" : `objectiveXClicked('${ob.id}')`}, "X", []],
             ["div",    {"class" : "draggableRespTitle"},    ob.title,                    []],
             ["div",    {"class" : "draggableRespSubtitle"}, ob.weeklyHours + "h / week", []]
         ]
