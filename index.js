@@ -895,11 +895,31 @@ function createUIContent()
 
 //------------------------------------------------------------------------------
 
+function updateObjectiveTitleFontSize(elem)
+{
+    const fontSizeMap = [[80,"70%"], [45,"85%"], [0,"95%"]];
+    const n           = elem.innerText.length;    
+    for (const entry of fontSizeMap)
+        {
+            if (n > entry[0])
+            {   
+                elem.style["font-size"] = entry[1];
+                break;
+            }
+        }
+}
+
+//------------------------------------------------------------------------------
+
 function updateObjectiveUI(id, objective)
 {   
     const elem = document.getElementById("o" + id);
 
-    elem.querySelector(".draggableRespTitle").innerText    = objective.title;
+    const titleElem     = elem.querySelector(".draggableRespTitle");
+    titleElem.innerText = objective.title;    
+    
+    updateObjectiveTitleFontSize(titleElem);
+
     elem.querySelector(".draggableRespSubtitle").innerText = objective.weeklyHours + "h / week";
 }
 
@@ -918,6 +938,8 @@ function createObjectiveUI(ob)
         ]
     ];
     const newHTMLElem = addToDOM(newRespHTML, document.querySelector("#respCreationArea"));    
+
+    updateObjectiveTitleFontSize(newHTMLElem);
 
     // setup drag event listener
     newHTMLElem.ondragstart = (e) =>
